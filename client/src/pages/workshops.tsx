@@ -4,6 +4,7 @@ import { WorkshopBuilder } from "@/components/workshop/workshop-builder";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Play, Clock, Users } from "lucide-react";
 import type { Workshop } from "@shared/schema";
 
@@ -15,12 +16,11 @@ export default function Workshops() {
   });
 
   const handleSaveWorkshop = (workshop: any) => {
-    // TODO: Implement save functionality
     console.log("Saving workshop:", workshop);
+    setShowBuilder(false);
   };
 
   const handlePreviewWorkshop = (workshop: any) => {
-    // TODO: Implement preview functionality
     console.log("Previewing workshop:", workshop);
   };
 

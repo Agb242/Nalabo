@@ -11,6 +11,7 @@ import Home from "@/pages/home";
 import Workshops from "@/pages/workshops";
 import Dashboard from "@/pages/dashboard";
 import Challenges from "@/pages/challenges";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/workshops" component={Workshops} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/challenges" component={Challenges} />
+      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );

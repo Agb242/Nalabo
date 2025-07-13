@@ -110,8 +110,10 @@ export function Header() {
                   <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil</span>
+                    <Link href="/profile" className="flex items-center w-full">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profil</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <span>Points: {user?.points || 0}</span>

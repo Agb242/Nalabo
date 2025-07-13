@@ -13,6 +13,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/me", getCurrentUser);
 
   // User routes
+  app.get("/api/users/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Only allow users to view their own profile or admins to view any profile
+      if (user.id !== req.session.userId && req.session.userRole !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const { password, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/users/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      // Only allow users to update their own profile or admins to update any profile
+      if (userId !== req.session.userId && req.session.userRole !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      // Don't allow updating sensitive fields through this endpoint
+      const allowedFields = ["firstName", "lastName", "email"];
+      const filteredUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = updates[key];
+          return obj;
+        }, {} as any);
+
+      const user = await storage.updateUser(userId, filteredUpdates);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { password, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Update user error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.post("/api/users", requireAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
@@ -46,13 +101,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Workshop routes
-  app.post("/api/workshops", async (req, res) => {
+  app.post("/api/workshops", requireAuth, async (req, res) => {
     try {
-      const workshopData = insertWorkshopSchema.parse(req.body);
-      const workshop = await storage.createWorkshop(workshopData);
-      res.json(workshop);
+      const workshopData = {
+        ...req.body,
+        authorId: req.session.userId,
+        isPublic: req.body.isPublic !== undefined ? req.body.isPublic : true,
+      };
+      
+      const validatedData = insertWorkshopSchema.parse(workshopData);
+      const workshop = await storage.createWorkshop(validatedData);
+      res.status(201).json(workshop);
     } catch (error) {
-      res.status(400).json({ error: "Invalid workshop data" });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      console.error("Create workshop error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

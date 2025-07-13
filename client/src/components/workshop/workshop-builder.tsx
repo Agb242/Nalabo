@@ -1,171 +1,292 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Save, Play, Trash2, Bot } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Plus, 
+  Trash2, 
+  Save, 
+  Eye,
+  Code,
+  FileText,
+  Terminal,
+  HelpCircle,
+  GripVertical
+} from "lucide-react";
 
 interface WorkshopStep {
   id: string;
   type: "instruction" | "code" | "terminal" | "quiz";
+  title: string;
   content: string;
+  expected_output?: string;
+  hint?: string;
 }
 
 interface WorkshopBuilderProps {
   onSave?: (workshop: any) => void;
   onPreview?: (workshop: any) => void;
+  initialWorkshop?: any;
 }
 
-export function WorkshopBuilder({ onSave, onPreview }: WorkshopBuilderProps) {
-  const [steps, setSteps] = useState<WorkshopStep[]>([
-    {
-      id: "1",
-      type: "instruction",
-      content: "Introduction à Docker : comprendre les concepts de base des conteneurs"
+export function WorkshopBuilder({ onSave, onPreview, initialWorkshop }: WorkshopBuilderProps) {
+  const { toast } = useToast();
+  const [workshop, setWorkshop] = useState({
+    title: initialWorkshop?.title || "",
+    description: initialWorkshop?.description || "",
+    category: initialWorkshop?.category || "",
+    difficulty: initialWorkshop?.difficulty || "beginner",
+    duration: initialWorkshop?.duration || 60,
+    tags: initialWorkshop?.tags || [],
+    steps: initialWorkshop?.steps || [] as WorkshopStep[]
+  });
+
+  const [newTag, setNewTag] = useState("");
+
+  const saveWorkshopMutation = useMutation({
+    mutationFn: async (workshopData: any) => {
+      const response = await apiRequest("POST", "/api/workshops", workshopData);
+      if (!response.ok) {
+        throw new Error("Failed to save workshop");
+      }
+      return response.json();
     },
-    {
-      id: "2",
-      type: "terminal",
-      content: "docker run hello-world"
-    }
-  ]);
-
-  const [selectedTemplate, setSelectedTemplate] = useState("docker-basics");
-
-  const templates = [
-    { id: "docker-basics", name: "Docker Basics", description: "Introduction aux conteneurs" },
-    { id: "kubernetes-deploy", name: "Kubernetes Deploy", description: "Déploiement d'applications" },
-    { id: "ai-ml-pipeline", name: "AI/ML Pipeline", description: "Pipeline machine learning" },
-  ];
+    onSuccess: (data) => {
+      toast({
+        title: "Atelier sauvegardé",
+        description: "L'atelier a été sauvegardé avec succès",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/workshops"] });
+      onSave?.(data);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue",
+        variant: "destructive",
+      });
+    },
+  });
 
   const addStep = () => {
     const newStep: WorkshopStep = {
-      id: (steps.length + 1).toString(),
+      id: Date.now().toString(),
       type: "instruction",
-      content: ""
+      title: "",
+      content: "",
     };
-    setSteps([...steps, newStep]);
+    setWorkshop(prev => ({
+      ...prev,
+      steps: [...prev.steps, newStep]
+    }));
+  };
+
+  const updateStep = (stepId: string, field: string, value: string) => {
+    setWorkshop(prev => ({
+      ...prev,
+      steps: prev.steps.map(step =>
+        step.id === stepId ? { ...step, [field]: value } : step
+      )
+    }));
   };
 
   const removeStep = (stepId: string) => {
-    setSteps(steps.filter(step => step.id !== stepId));
+    setWorkshop(prev => ({
+      ...prev,
+      steps: prev.steps.filter(step => step.id !== stepId)
+    }));
   };
 
-  const updateStep = (stepId: string, field: keyof WorkshopStep, value: string) => {
-    setSteps(steps.map(step => 
-      step.id === stepId ? { ...step, [field]: value } : step
-    ));
+  const addTag = () => {
+    if (newTag.trim() && !workshop.tags.includes(newTag.trim())) {
+      setWorkshop(prev => ({
+        ...prev,
+        tags: [...prev.tags, newTag.trim()]
+      }));
+      setNewTag("");
+    }
   };
 
-  const getStepTypeColor = (type: string) => {
+  const removeTag = (tagToRemove: string) => {
+    setWorkshop(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleSave = () => {
+    if (!workshop.title.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Le titre de l'atelier est requis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveWorkshopMutation.mutate(workshop);
+  };
+
+  const handlePreview = () => {
+    console.log("Previewing workshop:", workshop);
+    onPreview?.(workshop);
+  };
+
+  const getStepIcon = (type: string) => {
     switch (type) {
-      case "instruction":
-        return "bg-blue-500";
-      case "code":
-        return "bg-green-500";
-      case "terminal":
-        return "bg-purple-500";
-      case "quiz":
-        return "bg-yellow-500";
-      default:
-        return "bg-gray-500";
+      case "instruction": return <FileText className="h-4 w-4" />;
+      case "code": return <Code className="h-4 w-4" />;
+      case "terminal": return <Terminal className="h-4 w-4" />;
+      case "quiz": return <HelpCircle className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden">
-      {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h3 className="text-xl font-bold text-blue-800 dark:text-white">
-              Nouvel Atelier Docker
-            </h3>
-            <Badge className="bg-emerald-500 text-white">Brouillon</Badge>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              onClick={() => onSave && onSave({ steps })}
-              className="text-slate-600 dark:text-gray-300 hover:text-orange-500"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Sauvegarder
-            </Button>
-            <Button
-              onClick={() => onPreview && onPreview({ steps })}
-              className="bg-orange-500 text-white hover:bg-orange-600"
-            >
-              <Play className="h-4 w-4 mr-2" />
-              Prévisualiser
-            </Button>
-          </div>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Créateur d'Atelier</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handlePreview}>
+            <Eye className="h-4 w-4 mr-2" />
+            Aperçu
+          </Button>
+          <Button onClick={handleSave} disabled={saveWorkshopMutation.isPending}>
+            <Save className="h-4 w-4 mr-2" />
+            {saveWorkshopMutation.isPending ? "Sauvegarde..." : "Sauvegarder"}
+          </Button>
         </div>
       </div>
-      
-      {/* Content */}
-      <div className="grid lg:grid-cols-3 gap-6 p-6">
-        {/* Templates Panel */}
-        <div className="lg:col-span-1">
-          <h4 className="font-bold mb-4 text-blue-800 dark:text-white">
-            Templates Disponibles
-          </h4>
-          <div className="space-y-3">
-            {templates.map((template) => (
-              <Card
-                key={template.id}
-                className={`cursor-pointer transition-colors ${
-                  selectedTemplate === template.id
-                    ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-orange-500"
-                }`}
-                onClick={() => setSelectedTemplate(template.id)}
-              >
-                <CardContent className="p-4">
-                  <h5 className={`font-semibold ${
-                    selectedTemplate === template.id ? "text-orange-500" : "text-blue-800 dark:text-white"
-                  }`}>
-                    {template.name}
-                  </h5>
-                  <p className="text-sm text-slate-600 dark:text-gray-300">
-                    {template.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+
+      {/* Workshop Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Informations de l'atelier</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">Titre</Label>
+              <Input
+                id="title"
+                value={workshop.title}
+                onChange={(e) => setWorkshop(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Titre de l'atelier"
+              />
+            </div>
+            <div>
+              <Label htmlFor="category">Catégorie</Label>
+              <Select value={workshop.category} onValueChange={(value) => setWorkshop(prev => ({ ...prev, category: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez une catégorie" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="docker">Docker</SelectItem>
+                  <SelectItem value="kubernetes">Kubernetes</SelectItem>
+                  <SelectItem value="ai-ml">IA/ML</SelectItem>
+                  <SelectItem value="cloud">Cloud</SelectItem>
+                  <SelectItem value="devops">DevOps</SelectItem>
+                  <SelectItem value="security">Sécurité</SelectItem>
+                  <SelectItem value="data-science">Data Science</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-        
-        {/* Editor Panel */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="font-bold text-blue-800 dark:text-white">
-              Édition de l'Atelier
-            </h4>
-            <Button
-              variant="outline"
-              className="text-orange-500 hover:text-orange-600 border-orange-500"
-            >
-              <Bot className="h-4 w-4 mr-2" />
-              Assistance IA
-            </Button>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="difficulty">Difficulté</Label>
+              <Select value={workshop.difficulty} onValueChange={(value) => setWorkshop(prev => ({ ...prev, difficulty: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Débutant</SelectItem>
+                  <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                  <SelectItem value="advanced">Avancé</SelectItem>
+                  <SelectItem value="expert">Expert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="duration">Durée (minutes)</Label>
+              <Input
+                id="duration"
+                type="number"
+                value={workshop.duration}
+                onChange={(e) => setWorkshop(prev => ({ ...prev, duration: parseInt(e.target.value) || 60 }))}
+                placeholder="60"
+              />
+            </div>
           </div>
-          
-          {/* Steps */}
+
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={workshop.description}
+              onChange={(e) => setWorkshop(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Description de l'atelier"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label>Tags</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {workshop.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="cursor-pointer">
+                  {tag}
+                  <button
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                placeholder="Ajouter un tag"
+              />
+              <Button type="button" onClick={addTag}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Workshop Steps */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Étapes de l'atelier</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
-            {steps.map((step, index) => (
-              <Card key={step.id} className="border-gray-200 dark:border-gray-700">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <span className={`w-6 h-6 ${getStepTypeColor(step.type)} text-white rounded-full flex items-center justify-center text-sm font-semibold`}>
-                        {index + 1}
-                      </span>
-                      <Select
-                        value={step.type}
-                        onValueChange={(value) => updateStep(step.id, "type", value)}
-                      >
+            {workshop.steps.map((step, index) => (
+              <Card key={step.id} className="border-l-4 border-l-orange-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GripVertical className="h-4 w-4 text-gray-400" />
+                      <span className="font-medium">Étape {index + 1}</span>
+                      {getStepIcon(step.type)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Select value={step.type} onValueChange={(value) => updateStep(step.id, "type", value)}>
                         <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>
@@ -176,39 +297,74 @@ export function WorkshopBuilder({ onSave, onPreview }: WorkshopBuilderProps) {
                           <SelectItem value="quiz">Quiz</SelectItem>
                         </SelectContent>
                       </Select>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeStep(step.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeStep(step.id)}
-                      className="text-slate-600 dark:text-gray-300 hover:text-red-500"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
-                  <Textarea
-                    value={step.content}
-                    onChange={(e) => updateStep(step.id, "content", e.target.value)}
-                    className="w-full border-gray-300 dark:border-gray-600"
-                    rows={3}
-                    placeholder="Décrivez l'étape de votre atelier..."
-                  />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label>Titre</Label>
+                    <Input
+                      value={step.title}
+                      onChange={(e) => updateStep(step.id, "title", e.target.value)}
+                      placeholder="Titre de l'étape"
+                    />
+                  </div>
+                  <div>
+                    <Label>Contenu</Label>
+                    <Textarea
+                      value={step.content}
+                      onChange={(e) => updateStep(step.id, "content", e.target.value)}
+                      placeholder={
+                        step.type === "code" ? "Code à exécuter..." :
+                        step.type === "terminal" ? "Commandes terminal..." :
+                        step.type === "quiz" ? "Question du quiz..." :
+                        "Instructions pour l'utilisateur..."
+                      }
+                      rows={4}
+                    />
+                  </div>
+                  {(step.type === "code" || step.type === "terminal") && (
+                    <div>
+                      <Label>Sortie attendue (optionnel)</Label>
+                      <Textarea
+                        value={step.expected_output || ""}
+                        onChange={(e) => updateStep(step.id, "expected_output", e.target.value)}
+                        placeholder="Sortie attendue..."
+                        rows={2}
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <Label>Conseil (optionnel)</Label>
+                    <Input
+                      value={step.hint || ""}
+                      onChange={(e) => updateStep(step.id, "hint", e.target.value)}
+                      placeholder="Conseil pour aider l'utilisateur..."
+                    />
+                  </div>
                 </CardContent>
               </Card>
             ))}
             
-            {/* Add Step Button */}
             <Button
-              onClick={addStep}
               variant="outline"
-              className="w-full border-2 border-dashed border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 py-8"
+              onClick={addStep}
+              className="w-full border-dashed border-2 hover:border-orange-500"
             >
               <Plus className="h-4 w-4 mr-2" />
               Ajouter une étape
             </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
