@@ -145,7 +145,6 @@ export class DatabaseStorage implements IStorage {
   async getLeaderboard(): Promise<any[]> {
     const leaderboard = await db
       .select({
-        rank: count(),
         username: users.username,
         points: users.points,
         title: users.role,
