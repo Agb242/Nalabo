@@ -10,22 +10,32 @@ export default function Home() {
       <section className="bg-gradient-to-r from-blue-800 to-orange-500 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center justify-center w-20 h-20 bg-white/20 rounded-xl shadow-2xl backdrop-blur-sm">
+                <svg className="w-12 h-12 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z"/>
+                </svg>
+              </div>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              L'alternative française à <span className="text-slate-100">Educates.dev</span>
+              <span className="text-white">Nalabo</span>
+              <br />
+              <span className="text-3xl md:text-4xl text-blue-100">Plateforme Cloud-Native de Workshops Tech</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              Plateforme cloud-native pour workshops tech immersifs
+            <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-4xl mx-auto">
+              Nalabo révolutionne l'apprentissage technologique avec des ateliers interactifs, 
+              des environnements containerisés et une approche "hands-on" immersive en français.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/workshops">
-                <Button size="lg" className="bg-white text-blue-800 hover:bg-gray-100 font-bold">
+                <Button size="lg" className="bg-white text-blue-800 hover:bg-gray-100 font-bold px-8 py-3">
                   Commencer un atelier
                 </Button>
               </Link>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-blue-800 font-bold"
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-800 font-bold px-8 py-3"
               >
                 Découvrir la plateforme
               </Button>

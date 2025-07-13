@@ -15,53 +15,55 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-blue-800 rounded-lg">
-              <span className="text-white font-bold text-xl">N</span>
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-orange-500 to-blue-800 rounded-lg shadow-lg">
+              <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z"/>
+              </svg>
             </div>
             <div>
               <h1 className="text-xl font-bold text-blue-800 dark:text-orange-500">Nalabo</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Workshops Tech</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Plateforme Cloud-Native de Workshops Tech</p>
             </div>
           </Link>
           
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link href="/workshops">
-              <a className={`font-medium transition-colors ${
+              <span className={`font-medium transition-colors ${
                 isActive("/workshops") 
                   ? "text-orange-500" 
                   : "text-blue-800 dark:text-slate-300 hover:text-orange-500"
               }`}>
                 Ateliers
-              </a>
+              </span>
             </Link>
             <Link href="/challenges">
-              <a className={`font-medium transition-colors ${
+              <span className={`font-medium transition-colors ${
                 isActive("/challenges") 
                   ? "text-orange-500" 
                   : "text-slate-600 dark:text-slate-300 hover:text-orange-500"
               }`}>
                 Défis
-              </a>
+              </span>
             </Link>
             <Link href="/dashboard">
-              <a className={`font-medium transition-colors ${
+              <span className={`font-medium transition-colors ${
                 isActive("/dashboard") 
                   ? "text-orange-500" 
                   : "text-slate-600 dark:text-slate-300 hover:text-orange-500"
               }`}>
                 Tableau de bord
-              </a>
+              </span>
             </Link>
-            <a href="#" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium">
+            <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
               Communauté
-            </a>
-            <a href="#" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium">
+            </span>
+            <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
               Certifications
-            </a>
-            <a href="#" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium">
+            </span>
+            <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
               Marketplace
-            </a>
+            </span>
           </nav>
           
           {/* User Actions */}
