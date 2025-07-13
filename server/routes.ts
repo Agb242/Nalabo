@@ -2,11 +2,18 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertWorkshopSchema, insertChallengeSchema, insertWorkshopSessionSchema, insertChallengeParticipationSchema } from "@shared/schema";
+import { registerUser, loginUser, logoutUser, getCurrentUser, requireAuth, requireAdmin } from "./auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth routes
+  app.post("/api/auth/register", registerUser);
+  app.post("/api/auth/login", loginUser);
+  app.post("/api/auth/logout", logoutUser);
+  app.get("/api/auth/me", getCurrentUser);
+
   // User routes
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", requireAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);

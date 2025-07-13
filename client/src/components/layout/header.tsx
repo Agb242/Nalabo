@@ -1,11 +1,32 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
-import { Moon, Sun } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-context";
+import { AuthModal } from "@/components/auth/auth-modal";
+import { Moon, Sun, User, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { user, logout, isAuthenticated } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   const isActive = (path: string) => location === path;
 
@@ -76,12 +97,48 @@ export function Header() {
             >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-            <Button className="bg-orange-500 text-white hover:bg-orange-600">
-              Connexion
-            </Button>
+            
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span>{user?.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <span>Points: {user?.points || 0}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Déconnexion</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                onClick={() => setAuthModalOpen(true)}
+                className="bg-orange-500 text-white hover:bg-orange-600"
+              >
+                Connexion
+              </Button>
+            )}
           </div>
         </div>
       </div>
+      
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+      />
     </header>
   );
 }
