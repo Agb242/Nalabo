@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { WorkshopBuilder } from "@/components/workshop/workshop-builder";
+import { WorkshopSession } from "@/components/workshop/workshop-session";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import type { Workshop } from "@shared/schema";
 
 export default function Workshops() {
   const [showBuilder, setShowBuilder] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   const { data: workshops, isLoading } = useQuery<Workshop[]>({
     queryKey: ["/api/workshops"],
@@ -22,6 +24,35 @@ export default function Workshops() {
 
   const handlePreviewWorkshop = (workshop: any) => {
     console.log("Previewing workshop:", workshop);
+  };
+
+  const handleStartWorkshop = async (workshopId: string) => {
+    try {
+      const response = await fetch('/api/workshops/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          workshopId: workshopId.toString(),
+          duration: 240, // 4 heures
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start workshop session');
+      }
+
+      const data = await response.json();
+      setActiveSessionId(data.session.id);
+    } catch (error) {
+      console.error('Error starting workshop:', error);
+    }
+  };
+
+  const handleSessionEnd = () => {
+    setActiveSessionId(null);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -72,6 +103,17 @@ export default function Workshops() {
             onPreview={handlePreviewWorkshop}
           />
         </div>
+      </div>
+    );
+  }
+
+  if (activeSessionId) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-800 p-4">
+        <WorkshopSession 
+          sessionId={activeSessionId} 
+          onSessionEnd={handleSessionEnd}
+        />
       </div>
     );
   }
@@ -142,8 +184,11 @@ export default function Workshops() {
                   </div>
                   
                   <Button className="w-full bg-orange-500 text-white hover:bg-orange-600">
-                    <Play className="h-4 w-4 mr-2" />
-                    Commencer
+                    <Play 
+                      className="h-4 w-4 mr-2" 
+                      onClick={() => handleStartWorkshop(workshop.id.toString())}
+                    />
+                    Démarrer l'atelier
                   </Button>
                 </CardContent>
               </Card>
