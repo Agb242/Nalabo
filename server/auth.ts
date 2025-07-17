@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 import { storage } from "./storage";
 import { insertUserSchema } from "@shared/schema";
