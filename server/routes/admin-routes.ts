@@ -19,7 +19,16 @@ const createClusterSchema = z.object({
   message: 'Either kubeconfig or token is required',
 });
 
-const updateClusterSchema = createClusterSchema.partial();
+const updateClusterSchema = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  endpoint: z.string().url().optional(),
+  kubeconfig: z.string().optional(),
+  token: z.string().optional(),
+  namespace: z.string().optional(),
+  context: z.string().optional(),
+  isDefault: z.boolean().optional(),
+});
 
 /**
  * @route GET /api/admin/infrastructures

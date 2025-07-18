@@ -10,6 +10,7 @@ import { Footer } from "@/components/layout/footer";
 import Home from "@/pages/home";
 import Workshops from "@/pages/workshops";
 import WorkshopMaster from "@/pages/workshop-master";
+import AdminDashboard from "@/pages/admin-dashboard";
 import Dashboard from "@/pages/dashboard";
 import Challenges from "@/pages/challenges";
 import Profile from "@/pages/profile";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/workshops" component={Workshops} />
       <Route path="/workshop/:workshopId" component={WorkshopMaster} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/challenges" component={Challenges} />
       <Route path="/profile" component={Profile} />

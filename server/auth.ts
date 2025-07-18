@@ -157,6 +157,8 @@ export async function getCurrentUser(req: Request, res: Response) {
   }
 }
 
+
+
 // Extend Express session type
 declare module "express-session" {
   interface SessionData {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
-import { Moon, Sun, User, LogOut } from "lucide-react";
+import { Moon, Sun, User, LogOut, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,6 +118,17 @@ export function Header() {
                   <DropdownMenuItem>
                     <span>Points: {user?.points || 0}</span>
                   </DropdownMenuItem>
+                  {user?.role === 'admin' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link href="/admin" className="flex items-center w-full">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Administration</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />

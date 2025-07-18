@@ -200,7 +200,6 @@ export class DatabaseStorage implements IStorage {
       successRate: 87, // Mock value for now
     };
   }
-}
 
   // Kubernetes Clusters - Implémentation temporaire en mémoire
   private kubernetesClusters: Map<string, KubernetesCluster> = new Map();
