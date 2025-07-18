@@ -39,6 +39,8 @@ export interface IStorage {
   // Analytics
   getLeaderboard(): Promise<any[]>;
   getAnalyticsStats(): Promise<any>;
+  getUserWorkshops(userId: number): Promise<Workshop[]>;
+  getUserSessions(userId: number): Promise<WorkshopSession[]>;
 
   // Kubernetes Clusters
   getKubernetesClusters(): Promise<KubernetesCluster[]>;

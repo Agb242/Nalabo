@@ -22,7 +22,7 @@ export const users = pgTable("users", {
   avatar: text("avatar"),
   points: integer("points").default(0),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedAt: timestamp("updated_updatedAt").defaultNow(),
 });
 
 // Workshops table

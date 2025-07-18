@@ -11,7 +11,7 @@ interface AnalyticsStats {
 
 export default function Dashboard() {
   const { data: stats, isLoading } = useQuery<AnalyticsStats>({
-    queryKey: ["/api/analytics/stats"],
+    queryKey: ["/api/analytics/user-stats"],
   });
 
   if (isLoading) {

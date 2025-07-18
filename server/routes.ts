@@ -6,6 +6,8 @@ import { storage } from "./storage";
 import { insertUserSchema, insertWorkshopSchema, insertChallengeSchema, insertWorkshopSessionSchema, insertChallengeParticipationSchema } from "@shared/schema";
 import { registerUser, loginUser, logoutUser, getCurrentUser, requireAuth, requireAdmin } from "./auth";
 import { z } from "zod";
+import { userStatsRoutes } from './routes/user-stats-routes';
+import { workshopCreationRoutes } from './routes/workshop-creation-routes';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -18,14 +20,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/workshops", enhancedWorkshopRoutes);
 
   // Admin routes
-  app.use("/api/admin", adminRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/workshops', enhancedWorkshopRoutes);
+  app.use('/api/analytics', userStatsRoutes);
+  app.use('/api/workshops', workshopCreationRoutes);
 
   // User routes
   app.get("/api/users/:id", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const user = await storage.getUser(userId);
-      
+
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -47,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = parseInt(req.params.id);
       const updates = req.body;
-      
+
       // Only allow users to update their own profile or admins to update any profile
       if (userId !== req.session.userId && req.session.userRole !== "admin") {
         return res.status(403).json({ error: "Access denied" });
@@ -63,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }, {} as any);
 
       const user = await storage.updateUser(userId, filteredUpdates);
-      
+
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -116,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authorId: req.session.userId,
         isPublic: req.body.isPublic !== undefined ? req.body.isPublic : true,
       };
-      
+
       const validatedData = insertWorkshopSchema.parse(workshopData);
       const workshop = await storage.createWorkshop(validatedData);
       res.status(201).json(workshop);

@@ -7,20 +7,29 @@ import { z } from "zod";
 const SALT_ROUNDS = 12;
 
 // Auth middleware to check if user is authenticated
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (!req.session?.userId) {
-    return res.status(401).json({ error: "Authentication required" });
+    return res.status(401).json({ error: "Not authenticated" });
   }
   next();
-}
+};
 
-// Auth middleware to check if user has admin role
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (!req.session?.userId || req.session?.userRole !== "admin") {
-    return res.status(403).json({ error: "Admin access required" });
+export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session?.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
   }
-  next();
-}
+
+  try {
+    const user = await storage.getUser(req.session.userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    next();
+  } catch (error) {
+    console.error('Admin check error:', error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 // Hash password
 export async function hashPassword(password: string): Promise<string> {
@@ -50,7 +59,7 @@ export const loginSchema = z.object({
 export async function registerUser(req: Request, res: Response) {
   try {
     const validatedData = registerSchema.parse(req.body);
-    
+
     // Check if user already exists
     const existingUser = await storage.getUserByUsername(validatedData.username);
     if (existingUser) {
@@ -97,7 +106,7 @@ export async function registerUser(req: Request, res: Response) {
 export async function loginUser(req: Request, res: Response) {
   try {
     const validatedData = loginSchema.parse(req.body);
-    
+
     // Find user
     const user = await storage.getUserByUsername(validatedData.username);
     if (!user) {
