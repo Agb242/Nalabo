@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import workshopRoutes from "./routes/workshop-routes";
+import enhancedWorkshopRoutes from "./routes/enhanced-workshop-routes";
 import { storage } from "./storage";
 import { insertUserSchema, insertWorkshopSchema, insertChallengeSchema, insertWorkshopSessionSchema, insertChallengeParticipationSchema } from "@shared/schema";
 import { registerUser, loginUser, logoutUser, getCurrentUser, requireAuth, requireAdmin } from "./auth";
@@ -13,8 +13,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/logout", logoutUser);
   app.get("/api/auth/me", getCurrentUser);
 
-  // Workshop routes
-  app.use("/api/workshops", workshopRoutes);
+  // Enhanced Workshop routes with multi-infrastructure support
+  app.use("/api/workshops", enhancedWorkshopRoutes);
 
   // User routes
   app.get("/api/users/:id", requireAuth, async (req, res) => {
