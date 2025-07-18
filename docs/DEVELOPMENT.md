@@ -90,3 +90,34 @@ Pour déboguer le serveur :
 2. Lancer `pnpm debug`
 3. Ouvrir Chrome/Edge à l'adresse `chrome://inspect`
 4. Cliquer sur "Open dedicated DevTools for Node"
+
+## État Actuel du Projet (18 décembre 2024)
+
+### ✅ Fonctionnalités Opérationnelles
+- Système d'authentification utilisateur
+- Interface de création d'ateliers (frontend)
+- Base de données PostgreSQL avec Neon
+- Architecture modulaire backend/frontend
+- Composants UI avec Tailwind CSS
+
+### ⚠️ Problèmes Identifiés
+- Interface admin manquante
+- Isolation des données utilisateur incomplète
+- Workflow d'ateliers non fonctionnel
+- Erreurs de connexion base de données
+
+### 🔧 En Cours de Correction
+- Stabilisation de la connexion Neon
+- Création de l'interface admin
+- Implémentation de l'isolation des données
+- Correction du workflow d'ateliers
+
+### 📊 Métriques Actuelles
+- Pages frontend : 8 pages principales
+- Routes API : 15+ endpoints
+- Composants UI : 35+ composants
+- Services backend : 5 services principaux
+
+## Questions ?
+
+Pour toute question, ouvrez une discussion ou contacte

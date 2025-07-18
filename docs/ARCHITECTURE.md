@@ -125,3 +125,23 @@ Nalabo/
 - Séparation claire des responsabilités
 - Configuration externalisée
 - Logs et monitoring
+
+## Problèmes Identifiés (18 décembre 2024)
+
+### 🔴 Critiques
+1. **Interface Admin Manquante** : Pas d'UI pour gérer les infrastructures K8s
+2. **Isolation des Données** : Dashboard non filtré par utilisateur
+3. **Workflow d'Ateliers** : Déconnexion entre création et exécution
+4. **Stabilité Base de Données** : Erreurs de connexion Neon fréquentes
+
+### 🟡 Importantes
+- Gestion des erreurs de base de données
+- Système d'authentification admin
+- Monitoring des ressources K8s
+- Validation des templates d'ateliers
+
+### Corrections Prioritaires
+1. Stabiliser la connexion base de données
+2. Créer l'interface admin backoffice
+3. Implémenter l'isolation des données utilisateur
+4. Corriger le workflow de création d'ateliers

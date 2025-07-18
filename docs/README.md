@@ -26,4 +26,12 @@ docs/
 
 ## Mise à jour
 
-Dernière mise à jour : 17 juillet 2024
+Dernière mise à jour : 18 décembre 2024
+
+### Avancées du 18 décembre 2024
+
+- ✅ **Analyse complète du workflow d'ateliers** : Identification des incohérences dans le flux de création
+- ✅ **Audit de l'isolation des données utilisateur** : Problèmes détectés dans le filtrage par utilisateur
+- ✅ **Diagnostic des problèmes de base de données** : Erreurs de connexion Neon identifiées
+- ✅ **Évaluation du système d'administration** : Interface backoffice manquante identifiée
+- ✅ **Plan de corrections prioritaires** : Roadmap définie pour stabiliser la plateforme
