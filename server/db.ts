@@ -50,6 +50,23 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
+// Configuration pour la reconnexion automatique
+pool.on('error', (err) => {
+  console.error('Database connection error:', err);
+  if (err.message.includes('terminating connection')) {
+    console.log('🔄 Tentative de reconnexion automatique...');
+    // La reconnexion sera gérée automatiquement par le pool
+  }
+});
+
+pool.on('connect', () => {
+  console.log('✅ Connexion base de données établie');
+});
+
+pool.on('end', () => {
+  console.log('⚠️ Connexion base de données fermée');
+});
+
 export const db = drizzle(pool, { 
   schema,
   logger: process.env.NODE_ENV === 'development',

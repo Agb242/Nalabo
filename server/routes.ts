@@ -198,12 +198,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!session) {
         return res.status(404).json({ error: "Session not found" });
       }
-      
+
       // Only allow users to view their own sessions or admins to view any session
       if (session.userId !== req.session.userId && req.session.userRole !== "admin") {
         return res.status(403).json({ error: "Access denied" });
       }
-      
+
       res.json(session);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });

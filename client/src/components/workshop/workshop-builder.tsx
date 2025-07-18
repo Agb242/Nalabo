@@ -53,7 +53,17 @@ export function WorkshopBuilder({ onSave, onPreview, initialWorkshop }: Workshop
 
   const saveWorkshopMutation = useMutation({
     mutationFn: async (workshopData: any) => {
-      const response = await apiRequest("POST", "/api/workshops", workshopData);
+      const response = await fetch('/api/workshops/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...workshopData,
+          template: workshopData.template,
+          validateTemplate: true,
+          useOrchestrator: true
+        }),
+      });
       if (!response.ok) {
         throw new Error("Failed to save workshop");
       }
@@ -353,7 +363,7 @@ export function WorkshopBuilder({ onSave, onPreview, initialWorkshop }: Workshop
                 </CardContent>
               </Card>
             ))}
-            
+
             <Button
               variant="outline"
               onClick={addStep}
