@@ -8,6 +8,7 @@ import { registerUser, loginUser, logoutUser, getCurrentUser, requireAuth, requi
 import { z } from "zod";
 import { userStatsRoutes } from './routes/user-stats-routes';
 import { workshopCreationRoutes } from './routes/workshop-creation-routes';
+import { userIsolationRoutes } from './routes/user-isolation-routes';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -24,6 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/workshops', enhancedWorkshopRoutes);
   app.use('/api/analytics', userStatsRoutes);
   app.use('/api/workshops', workshopCreationRoutes);
+  app.use('/api', userIsolationRoutes);
 
   // User routes
   app.get("/api/users/:id", requireAuth, async (req, res) => {
@@ -134,9 +136,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/workshops", async (req, res) => {
+  app.get("/api/workshops", requireAuth, async (req, res) => {
     try {
-      const workshops = await storage.getWorkshops();
+      let workshops;
+      // If admin, get all workshops; otherwise, get only user's workshops
+      if (req.session.userRole === "admin") {
+        workshops = await storage.getWorkshops();
+      } else {
+        workshops = await storage.getUserWorkshopsByUserId(req.session.userId!);
+      }
       res.json(workshops);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
@@ -170,10 +178,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Workshop session routes
-  app.post("/api/workshop-sessions", async (req, res) => {
+  // Workshop session routes - SECURED
+  app.post("/api/workshop-sessions", requireAuth, async (req, res) => {
     try {
       const sessionData = insertWorkshopSessionSchema.parse(req.body);
+      // Auto-assign user to session
+      sessionData.userId = req.session.userId;
       const session = await storage.createWorkshopSession(sessionData);
       res.json(session);
     } catch (error) {
@@ -181,13 +191,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/workshop-sessions/:id", async (req, res) => {
+  app.get("/api/workshop-sessions/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const session = await storage.getWorkshopSession(id);
       if (!session) {
         return res.status(404).json({ error: "Session not found" });
       }
+      
+      // Only allow users to view their own sessions or admins to view any session
+      if (session.userId !== req.session.userId && req.session.userRole !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       res.json(session);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });

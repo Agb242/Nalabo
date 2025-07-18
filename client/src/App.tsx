@@ -12,6 +12,7 @@ import Workshops from "@/pages/workshops";
 import WorkshopMaster from "@/pages/workshop-master";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Dashboard from "@/pages/dashboard";
+import SecureDashboard from "@/pages/secure-dashboard";
 import Challenges from "@/pages/challenges";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/workshop/:workshopId" component={WorkshopMaster} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/secure-dashboard" component={SecureDashboard} />
       <Route path="/challenges" component={Challenges} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
