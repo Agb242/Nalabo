@@ -44,7 +44,7 @@ export default function Home() {
               Nalabo
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              La plateforme française pour créer et partager<br />
+              La plateforme cloud-native de workshops tech pour créer et partager<br />
               des <span className="text-blue-600 font-semibold">ateliers techniques interactifs</span>
             </p>
 
