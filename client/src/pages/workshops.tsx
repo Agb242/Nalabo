@@ -26,29 +26,9 @@ export default function Workshops() {
     console.log("Previewing workshop:", workshop);
   };
 
-  const handleStartWorkshop = async (workshopId: string) => {
-    try {
-      const response = await fetch('/api/workshops/sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          workshopId: workshopId.toString(),
-          duration: 240, // 4 heures
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to start workshop session');
-      }
-
-      const data = await response.json();
-      setActiveSessionId(data.session.id);
-    } catch (error) {
-      console.error('Error starting workshop:', error);
-    }
+  const handleStartWorkshop = (workshopId: string) => {
+    // Rediriger vers la page workshop-master
+    window.location.href = `/workshop/${workshopId}`;
   };
 
   const handleSessionEnd = () => {
@@ -183,12 +163,12 @@ export default function Workshops() {
                     </div>
                   </div>
                   
-                  <Button className="w-full bg-orange-500 text-white hover:bg-orange-600">
-                    <Play 
-                      className="h-4 w-4 mr-2" 
-                      onClick={() => handleStartWorkshop(workshop.id.toString())}
-                    />
-                    Démarrer l'atelier
+                  <Button 
+                    className="w-full bg-orange-500 text-white hover:bg-orange-600"
+                    onClick={() => handleStartWorkshop(workshop.id.toString())}
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Ouvrir l'Atelier
                   </Button>
                 </CardContent>
               </Card>

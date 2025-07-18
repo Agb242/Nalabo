@@ -1,6 +1,5 @@
 import { BaseInfrastructureService, InfrastructureConfig } from './base-infrastructure';
 import { KubernetesInfrastructureService } from './kubernetes-infrastructure';
-import { DockerInfrastructureService } from './docker-infrastructure';
 
 /**
  * Factory pour créer les services d'infrastructure appropriés
@@ -30,10 +29,8 @@ export class InfrastructureFactory {
     switch (config.type) {
       case 'kubernetes':
         return new KubernetesInfrastructureService(config);
-      case 'docker':
-        return new DockerInfrastructureService(config);
       default:
-        throw new Error(`Unsupported infrastructure type: ${config.type}`);
+        throw new Error(`Unsupported infrastructure type: ${config.type}. Only Kubernetes is supported.`);
     }
   }
 
@@ -74,7 +71,7 @@ export class InfrastructureFactory {
 }
 
 /**
- * Configuration par défaut pour différents types d'infrastructure
+ * Configuration par défaut pour l'infrastructure Kubernetes
  */
 export const DefaultInfrastructureConfigs = {
   kubernetes: {
@@ -93,23 +90,6 @@ export const DefaultInfrastructureConfigs = {
         token: process.env.K8S_TOKEN,
       },
       namespace: process.env.K8S_NAMESPACE || 'nalabo',
-    },
-  },
-  docker: {
-    local: {
-      type: 'docker' as const,
-      name: 'local-docker',
-      dockerHost: process.env.DOCKER_HOST || 'unix:///var/run/docker.sock',
-      dockerNetwork: process.env.DOCKER_NETWORK || 'bridge',
-    },
-    remote: {
-      type: 'docker' as const,
-      name: 'remote-docker',
-      dockerHost: process.env.DOCKER_HOST,
-      credentials: {
-        username: process.env.DOCKER_USERNAME,
-        password: process.env.DOCKER_PASSWORD,
-      },
     },
   },
 };

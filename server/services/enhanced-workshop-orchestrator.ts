@@ -10,7 +10,7 @@ export interface WorkshopTemplate {
   category: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   estimatedDuration: number; // en minutes
-  infrastructureType: 'kubernetes' | 'docker';
+  infrastructureType: 'kubernetes';
   resources: {
     cpu: string;
     memory: string;
@@ -73,7 +73,7 @@ export interface WorkshopSession {
   workshopId: string;
   userId: string;
   environmentId: string;
-  infrastructureType: 'kubernetes' | 'docker';
+  infrastructureType: 'kubernetes';
   status: 'starting' | 'active' | 'paused' | 'completed' | 'failed' | 'expired';
   currentStep: number;
   progress: {
@@ -114,7 +114,7 @@ export class EnhancedWorkshopOrchestrator extends EventEmitter {
     workshopId: string,
     userId: string,
     options?: {
-      infrastructureType?: 'kubernetes' | 'docker';
+      infrastructureType?: 'kubernetes';
       duration?: number;
       resources?: any;
     }
@@ -455,28 +455,15 @@ export class EnhancedWorkshopOrchestrator extends EventEmitter {
     return service;
   }
 
-  private determineInfrastructureType(workshop: any): 'kubernetes' | 'docker' {
+  private determineInfrastructureType(workshop: any): 'kubernetes' {
     // Logique pour déterminer le type d'infrastructure basé sur l'atelier
-    if (workshop.category === 'kubernetes' || workshop.template === 'kubernetes') {
-      return 'kubernetes';
-    }
-    if (workshop.category === 'docker' || workshop.template === 'docker') {
-      return 'docker';
-    }
-    
-    // Par défaut, utiliser Docker pour sa simplicité
-    return 'docker';
+    // Toujours utiliser Kubernetes pour une infrastructure robuste
+    return 'kubernetes';
   }
 
-  private getDefaultTemplate(infrastructureType: 'kubernetes' | 'docker'): string {
-    switch (infrastructureType) {
-      case 'kubernetes':
-        return 'kubernetes';
-      case 'docker':
-        return 'ubuntu';
-      default:
-        return 'ubuntu';
-    }
+  private getDefaultTemplate(infrastructureType: 'kubernetes'): string {
+    // Toujours utiliser le template Kubernetes
+    return 'kubernetes';
   }
 
   private getEnvironmentVariables(workshop: any): Record<string, string> {
@@ -502,47 +489,55 @@ export class EnhancedWorkshopOrchestrator extends EventEmitter {
   private getInitScripts(workshop: any): string[] {
     const scripts: string[] = [];
 
-    // Scripts d'initialisation selon la catégorie
+    // Scripts d'initialisation selon la catégorie pour Kubernetes
     switch (workshop.category) {
-      case 'docker':
-        scripts.push('dockerd &'); // Démarrer Docker daemon
-        break;
       case 'kubernetes':
         scripts.push('kubectl cluster-info'); // Vérifier la connectivité
+        scripts.push('kubectl get nodes'); // Vérifier les nodes
+        break;
+      case 'docker':
+        // Utiliser les concepts Docker dans Kubernetes
+        scripts.push('kubectl get pods'); // Équivalent des containers
         break;
       case 'python':
-        scripts.push('pip install --upgrade pip');
+        scripts.push('kubectl create configmap python-scripts --from-literal=requirements.txt="pip"');
         break;
     }
 
     return scripts;
   }
 
-  private adaptCommand(command: string, infrastructureType: 'kubernetes' | 'docker'): string[] {
-    // Adapter les commandes selon le type d'infrastructure
+  private adaptCommand(command: string, infrastructureType: 'kubernetes'): string[] {
+    // Adapter les commandes pour Kubernetes uniquement
     const parts = command.trim().split(/\s+/);
     
-    if (infrastructureType === 'kubernetes') {
-      // Pour Kubernetes, s'assurer que kubectl est utilisé correctement
-      if (parts[0] === 'kubectl') {
-        return parts;
-      }
-      // Ajouter kubectl si c'est une commande Kubernetes implicite
-      if (['get', 'apply', 'create', 'delete', 'describe'].includes(parts[0])) {
-        return ['kubectl', ...parts];
+    // Pour Kubernetes, s'assurer que kubectl est utilisé correctement
+    if (parts[0] === 'kubectl') {
+      return parts;
+    }
+    
+    // Ajouter kubectl si c'est une commande Kubernetes implicite
+    if (['get', 'apply', 'create', 'delete', 'describe', 'logs', 'exec'].includes(parts[0])) {
+      return ['kubectl', ...parts];
+    }
+    
+    // Convertir les commandes Docker en équivalents Kubernetes
+    if (parts[0] === 'docker') {
+      const dockerCmd = parts[1];
+      switch (dockerCmd) {
+        case 'ps':
+          return ['kubectl', 'get', 'pods'];
+        case 'images':
+          return ['kubectl', 'get', 'pods', '-o', 'jsonpath={.items[*].spec.containers[*].image}'];
+        case 'run':
+          return ['kubectl', 'run', ...parts.slice(2)];
+        default:
+          return ['kubectl', 'get', 'pods']; // Commande par défaut
       }
     }
-
-    if (infrastructureType === 'docker') {
-      // Pour Docker, s'assurer que docker est utilisé correctement
-      if (parts[0] === 'docker') {
-        return parts;
-      }
-      // Commandes shell directes pour Docker
-      return ['sh', '-c', command];
-    }
-
-    return parts;
+    
+    // Commandes shell directes
+    return ['sh', '-c', command];
   }
 
   private async deployWorkshopResources(
