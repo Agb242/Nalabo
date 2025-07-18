@@ -22,13 +22,13 @@ export interface FreemiumLimits {
 
 export const FREEMIUM_PLANS: Record<string, FreemiumLimits> = {
   free: {
-    maxWorkshops: 5,
-    maxSessionsPerDay: 3,
-    maxSessionDuration: 120, // 2 heures
-    allowedTools: ['bash', 'git', 'nano', 'curl', 'wget'],
-    allowedCategories: ['docker', 'kubernetes', 'python'],
-    maxCommunities: 1,
-    maxCommunityMembers: 5,
+    maxWorkshops: 2, // Réduit pour économiser les ressources
+    maxSessionsPerDay: 1, // Une session par jour seulement
+    maxSessionDuration: 30, // 30 minutes max (très limité)
+    allowedTools: ['bash', 'nano'], // Outils basiques uniquement
+    allowedCategories: ['docker'], // Une seule catégorie
+    maxCommunities: 0, // Pas de communautés en gratuit
+    maxCommunityMembers: 0,
     supportLevel: 'community',
     features: {
       aiAssistant: false,
@@ -42,13 +42,13 @@ export const FREEMIUM_PLANS: Record<string, FreemiumLimits> = {
     }
   },
   pro: {
-    maxWorkshops: -1, // illimité
-    maxSessionsPerDay: -1,
-    maxSessionDuration: 480, // 8 heures
-    allowedTools: ['bash', 'git', 'nano', 'curl', 'wget', 'docker', 'kubectl', 'helm', 'terraform', 'ansible'],
-    allowedCategories: ['docker', 'kubernetes', 'python', 'nodejs', 'go', 'rust', 'java', 'devops', 'security'],
-    maxCommunities: 10,
-    maxCommunityMembers: 50,
+    maxWorkshops: 20, // Limité mais généreux
+    maxSessionsPerDay: 10, // 10 sessions par jour
+    maxSessionDuration: 240, // 4 heures max
+    allowedTools: ['bash', 'git', 'nano', 'curl', 'wget', 'docker', 'kubectl', 'python', 'node'],
+    allowedCategories: ['docker', 'kubernetes', 'python', 'nodejs', 'devops'],
+    maxCommunities: 3, // Réduit pour gérer les coûts
+    maxCommunityMembers: 25, // Réduit également
     supportLevel: 'email',
     features: {
       aiAssistant: true,
