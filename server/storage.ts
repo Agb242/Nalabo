@@ -51,6 +51,11 @@ export interface IStorage {
   getActiveEnvironmentsByCluster(clusterId: string): Promise<any[]>;
   getActiveEnvironmentsCount(): Promise<number>;
   getTotalWorkshopsCount(): Promise<number>;
+  
+  // User-specific data isolation
+  getUserWorkshopsByUserId(userId: number): Promise<Workshop[]>;
+  getUserSessionsByUserId(userId: number): Promise<WorkshopSession[]>;
+  getUserChallengesByUserId(userId: number): Promise<Challenge[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -245,6 +250,19 @@ export class DatabaseStorage implements IStorage {
   async getTotalWorkshopsCount(): Promise<number> {
     const workshops = await this.getWorkshops();
     return workshops.length;
+  }
+
+  // User-specific data isolation methods
+  async getUserWorkshopsByUserId(userId: number): Promise<Workshop[]> {
+    return await db.select().from(workshops).where(eq(workshops.creatorId, userId));
+  }
+
+  async getUserSessionsByUserId(userId: number): Promise<WorkshopSession[]> {
+    return await db.select().from(workshopSessions).where(eq(workshopSessions.userId, userId));
+  }
+
+  async getUserChallengesByUserId(userId: number): Promise<Challenge[]> {
+    return await db.select().from(challenges).where(eq(challenges.creatorId, userId));
   }
 }
 

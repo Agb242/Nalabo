@@ -208,10 +208,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Challenge routes
-  app.post("/api/challenges", async (req, res) => {
+  // Challenge routes - SECURED
+  app.post("/api/challenges", requireAuth, async (req, res) => {
     try {
       const challengeData = insertChallengeSchema.parse(req.body);
+      // Auto-assign creator to authenticated user
+      challengeData.creatorId = req.session.userId;
       const challenge = await storage.createChallenge(challengeData);
       res.json(challenge);
     } catch (error) {

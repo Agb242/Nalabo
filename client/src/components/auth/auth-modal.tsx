@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LoginForm } from "./login-form";
 import { RegisterForm } from "./register-form";
 
@@ -20,12 +19,12 @@ export function AuthModal({ isOpen, onClose, defaultMode = "login" }: AuthModalP
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md p-0 border-gray-200 dark:border-gray-700">
-        <VisuallyHidden>
+        <DialogHeader className="sr-only">
           <DialogTitle>{mode === "login" ? "Connexion" : "Inscription"}</DialogTitle>
           <DialogDescription>
             {mode === "login" ? "Connectez-vous à votre compte" : "Créez un nouveau compte"}
           </DialogDescription>
-        </VisuallyHidden>
+        </DialogHeader>
         {mode === "login" ? (
           <LoginForm onToggleForm={toggleMode} />
         ) : (
