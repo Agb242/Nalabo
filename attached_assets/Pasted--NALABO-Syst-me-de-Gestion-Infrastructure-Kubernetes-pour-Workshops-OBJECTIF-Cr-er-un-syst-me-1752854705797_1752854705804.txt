@@ -1,0 +1,85 @@
+# NALABO - Système de Gestion Infrastructure Kubernetes pour Workshops
+
+## OBJECTIF
+Créer un système de backoffice administrateur permettant de connecter Nalabo à n'importe quelle infrastructure Kubernetes via kubeconfig et de monitorer toutes les ressources.
+
+## CONTEXTE TECHNIQUE
+- Architecture existante : vCluster pour isolation des utilisateurs
+- Isolation complète déjà implémentée au niveau utilisateur
+- Système modulaire avec Factory Pattern pour les infrastructures
+- Base de données PostgreSQL pour la persistance
+
+## FONCTIONNALITÉS À IMPLÉMENTER
+
+### 1. GESTIONNAIRE D'INFRASTRUCTURE CENTRALISÉ
+- Service `InfrastructureManager` pour gérer multiple clusters K8s
+- Support connexion via kubeconfig, token, endpoint
+- Health checks automatiques toutes les 5 minutes
+- Gestion des métadonnées (version, nodes, ressources)
+
+### 2. INTERFACE ADMIN COMPLÈTE
+- Dashboard avec statistiques globales
+- Gestion CRUD des infrastructures Kubernetes
+- Test de connexion en temps réel
+- Monitoring des ressources (CPU, Memory, Storage)
+- Vue des environnements actifs par infrastructure
+
+### 3. API ADMIN SÉCURISÉE
+- Routes protégées par authentification admin
+- Endpoints pour CRUD infrastructures
+- Monitoring des ressources et utilisation
+- Statistiques globales de la plateforme
+
+### 4. INTÉGRATION SEAMLESS
+- Modification du `EnhancedWorkshopOrchestrator` pour utiliser le nouveau système
+- Support multi-infrastructure pour les workshops
+- Infrastructure par défaut configurable
+- Répartition de charge automatique
+
+## ARCHITECTURE TECHNIQUE
+
+### Services
+- `InfrastructureManager` : Gestion centralisée
+- `KubernetesInfrastructureService` : Existant, adapté
+- `InfrastructureFactory` : Étendu pour support multi-instance
+
+### Routes API
+- `GET /api/admin/infrastructures` : Liste des infrastructures
+- `POST /api/admin/infrastructures` : Ajouter infrastructure
+- `PUT /api/admin/infrastructures/:id` : Modifier
+- `DELETE /api/admin/infrastructures/:id` : Supprimer
+- `POST /api/admin/infrastructures/:id/test` : Tester connexion
+- `GET /api/admin/resources/usage` : Monitoring ressources
+
+### Interface React
+- Page `AdminDashboard` avec onglets
+- Formulaires pour connexion kubeconfig
+- Graphiques de monitoring en temps réel
+- Gestion des infrastructures par défaut
+
+## SÉCURITÉ
+- Authentification admin obligatoire
+- Masquage des informations sensibles (kubeconfig, tokens)
+- Validation des configurations avant ajout
+- Isolation maintenue entre utilisateurs
+
+## MONITORING
+- Métriques par infrastructure
+- Alertes en cas de déconnexion
+- Historique des performances
+- Nettoyage automatique des ressources expirées
+
+## POINTS D'ATTENTION
+- Compatibilité avec l'existant (pas de breaking changes)
+- Performance lors de connexions multiples
+- Gestion des timeouts et reconnexions
+- Persistance des configurations en base
+
+## LIVRABLES ATTENDUS
+1. Service InfrastructureManager complet
+2. Routes API admin sécurisées
+3. Interface React responsive
+4. Documentation d'utilisation
+5. Tests de connexion automatisés
+
+EXÉCUTE cette architecture en gardant la simplicité et la robustesse.

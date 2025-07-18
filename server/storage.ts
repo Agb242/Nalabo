@@ -5,6 +5,7 @@ import {
   type Certification, type InsertCertification, type Community, type InsertCommunity,
   type CommunityMembership, type InsertCommunityMembership
 } from "@shared/schema";
+import type { KubernetesCluster } from "./services/infrastructure-manager";
 import { db } from "./db";
 import { eq, desc, and, count } from "drizzle-orm";
 
@@ -38,6 +39,16 @@ export interface IStorage {
   // Analytics
   getLeaderboard(): Promise<any[]>;
   getAnalyticsStats(): Promise<any>;
+
+  // Kubernetes Clusters
+  getKubernetesClusters(): Promise<KubernetesCluster[]>;
+  getKubernetesCluster(id: string): Promise<KubernetesCluster | undefined>;
+  createKubernetesCluster(cluster: KubernetesCluster): Promise<KubernetesCluster>;
+  updateKubernetesCluster(id: string, updates: Partial<KubernetesCluster>): Promise<KubernetesCluster | undefined>;
+  deleteKubernetesCluster(id: string): Promise<void>;
+  getActiveEnvironmentsByCluster(clusterId: string): Promise<any[]>;
+  getActiveEnvironmentsCount(): Promise<number>;
+  getTotalWorkshopsCount(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -188,6 +199,51 @@ export class DatabaseStorage implements IStorage {
       certificationsIssued: certificationCount.count,
       successRate: 87, // Mock value for now
     };
+  }
+}
+
+  // Kubernetes Clusters - Implémentation temporaire en mémoire
+  private kubernetesClusters: Map<string, KubernetesCluster> = new Map();
+
+  async getKubernetesClusters(): Promise<KubernetesCluster[]> {
+    return Array.from(this.kubernetesClusters.values());
+  }
+
+  async getKubernetesCluster(id: string): Promise<KubernetesCluster | undefined> {
+    return this.kubernetesClusters.get(id);
+  }
+
+  async createKubernetesCluster(cluster: KubernetesCluster): Promise<KubernetesCluster> {
+    this.kubernetesClusters.set(cluster.id, cluster);
+    return cluster;
+  }
+
+  async updateKubernetesCluster(id: string, updates: Partial<KubernetesCluster>): Promise<KubernetesCluster | undefined> {
+    const existing = this.kubernetesClusters.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.kubernetesClusters.set(id, updated);
+    return updated;
+  }
+
+  async deleteKubernetesCluster(id: string): Promise<void> {
+    this.kubernetesClusters.delete(id);
+  }
+
+  async getActiveEnvironmentsByCluster(clusterId: string): Promise<any[]> {
+    // Implémentation temporaire - retourner un tableau vide
+    return [];
+  }
+
+  async getActiveEnvironmentsCount(): Promise<number> {
+    // Implémentation temporaire
+    return 0;
+  }
+
+  async getTotalWorkshopsCount(): Promise<number> {
+    const workshops = await this.getWorkshops();
+    return workshops.length;
   }
 }
 
