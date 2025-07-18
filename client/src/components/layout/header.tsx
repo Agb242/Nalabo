@@ -36,16 +36,17 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            
             <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-lg">
-                <Zap className="h-6 w-6 text-orange-500" />
+              <div className="flex items-center justify-center w-10 h-10 bg-orange-500 rounded-lg shadow-lg">
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z"/>
+                </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  <span className="text-orange-500">NA</span>labo
+                <span className="text-xl font-bold text-white">
+                  Nalabo
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-300">
                   Plateforme cloud-native de workshops Tech
                 </span>
               </div>
