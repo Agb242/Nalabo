@@ -139,7 +139,7 @@ export default function Home() {
                   <Users className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                  Communautés Privées
+                  Vos Propres Communautés
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                   Créez des espaces dédiés pour vos équipes avec gestion d'accès et suivi de progression personnalisé.

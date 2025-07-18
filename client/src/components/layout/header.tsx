@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
-import { Moon, Sun, User, LogOut, Settings } from "lucide-react";
+import { Moon, Sun, User, LogOut, Settings, Zap } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,17 +36,22 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-orange-500 to-blue-800 rounded-lg shadow-lg">
-              <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z"/>
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-blue-800 dark:text-orange-500">Nalabo</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Plateforme Cloud-Native de Workshops Tech</p>
+            
+            <div className="flex items-center space-x-2">
+              <div className="p-2 rounded-lg">
+                <Zap className="h-6 w-6 text-orange-500" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                  <span className="text-orange-500">NA</span>labo
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Plateforme cloud-native de workshops Tech
+                </span>
+              </div>
             </div>
           </Link>
-          
+
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link href="/workshops">
@@ -86,7 +91,7 @@ export function Header() {
               Marketplace
             </span>
           </nav>
-          
+
           {/* User Actions */}
           <div className="flex items-center space-x-4">
             <Button
@@ -97,7 +102,7 @@ export function Header() {
             >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-            
+
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -147,7 +152,7 @@ export function Header() {
           </div>
         </div>
       </div>
-      
+
       <AuthModal 
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
