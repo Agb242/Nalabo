@@ -152,52 +152,272 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Detailed Features */}
+      {/* Intégrations Entreprise */}
       <section className="py-16 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12 text-blue-800 dark:text-orange-500">
-            Fonctionnalités Avancées
+          <h2 className="text-3xl font-bold text-center mb-4 text-blue-800 dark:text-orange-500">
+            Intégrations Entreprise
           </h2>
+          <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
+            Connectez Nalabo à vos outils existants pour une expérience seamless et des environnements cloud réels
+          </p>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Shield className="h-6 w-6 text-white" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <GitBranch className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold mb-2">DevOps & CI/CD</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  GitHub, GitLab, Jenkins, CircleCI
+                </p>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  <Badge variant="outline" className="text-xs">GitHub Actions</Badge>
+                  <Badge variant="outline" className="text-xs">GitLab CI</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold mb-2">Cloud Providers</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  AWS, Azure, GCP, environnements réels
+                </p>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  <Badge variant="outline" className="text-xs">AWS</Badge>
+                  <Badge variant="outline" className="text-xs">Azure</Badge>
+                  <Badge variant="outline" className="text-xs">GCP</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold mb-2">Collaboration</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  Slack, Teams, Discord, notifications
+                </p>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  <Badge variant="outline" className="text-xs">Slack</Badge>
+                  <Badge variant="outline" className="text-xs">Teams</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <h4 className="font-semibold mb-2">SSO & Sécurité</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  SAML, OAuth2, Active Directory
+                </p>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  <Badge variant="outline" className="text-xs">SAML</Badge>
+                  <Badge variant="outline" className="text-xs">OAuth2</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Use Cases Intégrations */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
+            <h3 className="text-xl font-bold mb-6 text-center">Cas d'usage concrets</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-2xl mb-2">🏢</div>
+                <h4 className="font-semibold mb-2">Recrutement Tech</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Évaluez les candidats avec des ateliers techniques connectés à votre SIRH
+                </p>
               </div>
-              <h4 className="font-semibold mb-2">Sécurité Avancée</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Isolation complète des environnements et données utilisateur
+              <div className="text-center">
+                <div className="text-2xl mb-2">📊</div>
+                <h4 className="font-semibold mb-2">Formation Continue</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Synchronisez la progression avec vos systèmes RH et LMS existants
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">⚡</div>
+                <h4 className="font-semibold mb-2">DevOps en Temps Réel</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Ateliers sur vos propres infrastructures cloud avec monitoring intégré
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ateliers Interactifs Avancés */}
+      <section className="py-16 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-4 text-blue-800 dark:text-orange-500">
+            Ateliers Interactifs Nouvelle Génération
+          </h2>
+          <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
+            Au-delà de Python : explorez les technologies émergentes avec l'IA comme copilote
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* IA & Machine Learning */}
+            <Card className="border-2 border-purple-200 dark:border-purple-800 hover:border-purple-400 transition-colors">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                  <CardTitle className="text-lg">IA & ML Avancés</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>Entraînement de modèles en temps réel</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>RAG et Embeddings vectoriels</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>Computer Vision avec OpenCV</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>LLMs personnalisés (Llama, Mistral)</span>
+                  </li>
+                </ul>
+                <div className="flex flex-wrap gap-1 mt-4">
+                  <Badge className="bg-purple-100 text-purple-800">PyTorch</Badge>
+                  <Badge className="bg-purple-100 text-purple-800">Transformers</Badge>
+                  <Badge className="bg-purple-100 text-purple-800">Langchain</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cloud Native & DevOps */}
+            <Card className="border-2 border-blue-200 dark:border-blue-800 hover:border-blue-400 transition-colors">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-white" />
+                  </div>
+                  <CardTitle className="text-lg">Cloud Native & DevOps</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Microservices avec Service Mesh</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>GitOps et Infrastructure as Code</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Observabilité (Grafana, Prometheus)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Serverless et Edge Computing</span>
+                  </li>
+                </ul>
+                <div className="flex flex-wrap gap-1 mt-4">
+                  <Badge className="bg-blue-100 text-blue-800">Terraform</Badge>
+                  <Badge className="bg-blue-100 text-blue-800">Helm</Badge>
+                  <Badge className="bg-blue-100 text-blue-800">Istio</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Coding avec IA */}
+            <Card className="border-2 border-green-200 dark:border-green-800 hover:border-green-400 transition-colors">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                    <Code2 className="h-5 w-5 text-white" />
+                  </div>
+                  <CardTitle className="text-lg">Vibe Coding avec IA</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Pair programming avec IA</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Code review automatique</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Refactoring intelligent</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Tests générés automatiquement</span>
+                  </li>
+                </ul>
+                <div className="flex flex-wrap gap-1 mt-4">
+                  <Badge className="bg-green-100 text-green-800">GitHub Copilot</Badge>
+                  <Badge className="bg-green-100 text-green-800">Cursor</Badge>
+                  <Badge className="bg-green-100 text-green-800">Claude</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Système de Défis Intégrés */}
+          <div className="mt-16 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-orange-800 dark:text-orange-300">
+                Modes d'Atelier Gamifiés
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Transformez l'apprentissage en aventure avec nos modes interactifs
               </p>
             </div>
-            
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Brain className="h-6 w-6 text-white" />
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">🎯</div>
+                <h4 className="font-semibold mb-2">Mode Apprentissage</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Ateliers guidés avec aide IA et progression adaptative
+                </p>
               </div>
-              <h4 className="font-semibold mb-2">IA Intégrée</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Génération d'ateliers et assistance automatisée
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Trophy className="h-6 w-6 text-white" />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 text-center border-2 border-orange-300">
+                <div className="text-3xl mb-3">⚡</div>
+                <h4 className="font-semibold mb-2">Mode Défi</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Challenges chronométrés avec classement en temps réel
+                </p>
               </div>
-              <h4 className="font-semibold mb-2">Certifications</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Badges numériques et certificats de compétences
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <GitBranch className="h-6 w-6 text-white" />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div className="text-3xl mb-3">👥</div>
+                <h4 className="font-semibold mb-2">Mode Collaboratif</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Ateliers en équipe avec code partagé en temps réel
+                </p>
               </div>
-              <h4 className="font-semibold mb-2">Intégrations</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                GitHub, GitLab, CI/CD et outils DevOps
-              </p>
             </div>
           </div>
         </div>
