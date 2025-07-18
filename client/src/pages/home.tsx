@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { 
-  LaptopIcon, 
-  Users, 
-  Shield, 
-  Zap, 
-  Globe, 
-  Code2, 
+import {
+  LaptopIcon,
+  Users,
+  Shield,
+  Zap,
+  Globe,
+  Code2,
   Container,
   Brain,
   GitBranch,
@@ -18,7 +18,7 @@ import {
   Play,
   Sparkles,
   Target,
-  Cloud
+  Cloud,
 } from "lucide-react";
 
 export default function Home() {
@@ -32,8 +32,12 @@ export default function Home() {
             <div className="flex justify-center mb-8">
               <div className="relative">
                 <div className="flex items-center justify-center w-16 h-16 bg-orange-500 rounded-2xl shadow-xl">
-                  <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z"/>
+                  <svg
+                    className="w-8 h-8 text-white"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z" />
                   </svg>
                 </div>
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -43,16 +47,25 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-              <span className="text-orange-500">NA</span><span className="text-white">labo</span>
+              <span className="text-orange-500">Na</span>
+              <span className="text-white">labo</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              La plateforme cloud-native de workshops tech pour créer et partager<br />
-              des <span className="text-blue-600 font-semibold">ateliers techniques interactifs</span>
+              La plateforme cloud-native de workshops tech pour créer et
+              partager
+              <br />
+              des{" "}
+              <span className="text-blue-600 font-semibold">
+                ateliers techniques interactifs
+              </span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link href="/workshops">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transition-all">
+                <Button
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transition-all"
+                >
                   <Play className="mr-2 h-5 w-5" />
                   Créer votre premier atelier
                 </Button>
@@ -92,7 +105,8 @@ export default function Home() {
               Tout ce dont vous avez besoin
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Des environnements isolés aux communautés privées, Nalabo simplifie l'apprentissage technique
+              Des environnements isolés aux communautés privées, Nalabo
+              simplifie l'apprentissage technique
             </p>
           </div>
 
@@ -106,12 +120,28 @@ export default function Home() {
                   Environnements Prêts
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Docker, Kubernetes, Python, Node.js... Tous vos outils techniques dans des environnements isolés et sécurisés.
+                  Docker, Kubernetes, Python, Node.js... Tous vos outils
+                  techniques dans des environnements isolés et sécurisés.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700">Docker</Badge>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700">Kubernetes</Badge>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700">Python</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-50 text-blue-700"
+                  >
+                    Docker
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-50 text-blue-700"
+                  >
+                    Kubernetes
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-50 text-blue-700"
+                  >
+                    Python
+                  </Badge>
                 </div>
               </div>
             </Card>
@@ -125,12 +155,28 @@ export default function Home() {
                   IA Intégrée
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Assistance IA pour le code, validation automatique des exercices et création de contenu intelligent.
+                  Assistance IA pour le code, validation automatique des
+                  exercices et création de contenu intelligent.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  <Badge variant="secondary" className="bg-orange-50 text-orange-700">Copilot</Badge>
-                  <Badge variant="secondary" className="bg-orange-50 text-orange-700">Auto-validation</Badge>
-                  <Badge variant="secondary" className="bg-orange-50 text-orange-700">Feedback</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-50 text-orange-700"
+                  >
+                    Copilot
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-50 text-orange-700"
+                  >
+                    Auto-validation
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-50 text-orange-700"
+                  >
+                    Feedback
+                  </Badge>
                 </div>
               </div>
             </Card>
@@ -144,12 +190,28 @@ export default function Home() {
                   Vos Propres Communautés
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                  Créez des espaces dédiés pour vos équipes avec gestion d'accès et suivi de progression personnalisé.
+                  Créez des espaces dédiés pour vos équipes avec gestion d'accès
+                  et suivi de progression personnalisé.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  <Badge variant="secondary" className="bg-green-50 text-green-700">Équipes</Badge>
-                  <Badge variant="secondary" className="bg-green-50 text-green-700">Permissions</Badge>
-                  <Badge variant="secondary" className="bg-green-50 text-green-700">Analytics</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-50 text-green-700"
+                  >
+                    Équipes
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-50 text-green-700"
+                  >
+                    Permissions
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-50 text-green-700"
+                  >
+                    Analytics
+                  </Badge>
                 </div>
               </div>
             </Card>
@@ -165,7 +227,8 @@ export default function Home() {
               Ateliers pour tous les besoins
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              De l'apprentissage guidé aux défis techniques, créez l'expérience parfaite
+              De l'apprentissage guidé aux défis techniques, créez l'expérience
+              parfaite
             </p>
           </div>
 
@@ -174,7 +237,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Target className="h-6 w-6 text-white" />
               </div>
-              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Mode Apprentissage</h4>
+              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                Mode Apprentissage
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Tutoriels guidés avec aide contextuelle
               </p>
@@ -184,7 +249,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
-              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Mode Défi</h4>
+              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                Mode Défi
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Challenges chronométrés avec classement
               </p>
@@ -194,7 +261,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Users className="h-6 w-6 text-white" />
               </div>
-              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Mode Collaboratif</h4>
+              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                Mode Collaboratif
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Ateliers en équipe temps réel
               </p>
@@ -204,7 +273,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Cloud className="h-6 w-6 text-white" />
               </div>
-              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Infrastructure Réelle</h4>
+              <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                Infrastructure Réelle
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 AWS, Azure, GCP connectés
               </p>
@@ -233,9 +304,12 @@ export default function Home() {
                     <GitBranch className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">DevOps & CI/CD</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      DevOps & CI/CD
+                    </h4>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      GitHub, GitLab, Jenkins intégrés directement dans vos ateliers
+                      GitHub, GitLab, Jenkins intégrés directement dans vos
+                      ateliers
                     </p>
                   </div>
                 </div>
@@ -245,9 +319,12 @@ export default function Home() {
                     <Cloud className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">Cloud Providers</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      Cloud Providers
+                    </h4>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      Connectez vos comptes AWS, Azure, GCP pour des ateliers réalistes
+                      Connectez vos comptes AWS, Azure, GCP pour des ateliers
+                      réalistes
                     </p>
                   </div>
                 </div>
@@ -257,9 +334,12 @@ export default function Home() {
                     <Shield className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">SSO & Sécurité</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      SSO & Sécurité
+                    </h4>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      SAML, OAuth2, Active Directory pour l'authentification entreprise
+                      SAML, OAuth2, Active Directory pour l'authentification
+                      entreprise
                     </p>
                   </div>
                 </div>
@@ -267,22 +347,30 @@ export default function Home() {
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Cas d'usage concrets</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                Cas d'usage concrets
+              </h3>
               <div className="space-y-4">
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Recrutement Tech</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    Recrutement Tech
+                  </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Évaluez les candidats avec des tests techniques réalistes
                   </p>
                 </div>
                 <div className="border-l-4 border-green-500 pl-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Formation Continue</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    Formation Continue
+                  </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Montée en compétences avec suivi de progression
                   </p>
                 </div>
                 <div className="border-l-4 border-orange-500 pl-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Onboarding</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    Onboarding
+                  </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Intégration des nouveaux développeurs
                   </p>
@@ -308,8 +396,12 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-8">
               <div className="text-center">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Gratuit</h3>
-                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">0€</div>
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                  Gratuit
+                </h3>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+                  0€
+                </div>
                 <p className="text-gray-500 mb-6">Pour découvrir</p>
                 <ul className="space-y-3 text-sm text-left mb-8">
                   <li className="flex items-center gap-2">
@@ -336,7 +428,9 @@ export default function Home() {
                 <Badge className="bg-blue-500 text-white">Populaire</Badge>
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Pro</h3>
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                  Pro
+                </h3>
                 <div className="text-4xl font-bold text-blue-600 mb-1">29€</div>
                 <p className="text-gray-500 mb-6">par mois</p>
                 <ul className="space-y-3 text-sm text-left mb-8">
@@ -365,8 +459,12 @@ export default function Home() {
 
             <Card className="border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-8">
               <div className="text-center">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Entreprise</h3>
-                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">Sur mesure</div>
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                  Entreprise
+                </h3>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+                  Sur mesure
+                </div>
                 <p className="text-gray-500 mb-6">Pour les équipes</p>
                 <ul className="space-y-3 text-sm text-left mb-8">
                   <li className="flex items-center gap-2">
@@ -402,11 +500,15 @@ export default function Home() {
             Prêt à créer votre premier atelier ?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Rejoignez les équipes qui utilisent déjà Nalabo pour transformer l'apprentissage technique.
+            Rejoignez les équipes qui utilisent déjà Nalabo pour transformer
+            l'apprentissage technique.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/workshops">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-medium rounded-xl shadow-lg">
+              <Button
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-medium rounded-xl shadow-lg"
+              >
                 Commencer maintenant
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
