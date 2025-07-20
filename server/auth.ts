@@ -14,21 +14,25 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
   next();
 };
 
-export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.session?.userId) {
-    return res.status(401).json({ error: "Not authenticated" });
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session?.userId || req.session.userRole !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
   }
+  next();
+};
 
-  try {
-    const user = await storage.getUser(req.session.userId);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: "Admin access required" });
-    }
-    next();
-  } catch (error) {
-    console.error('Admin check error:', error);
-    res.status(500).json({ error: "Server error" });
+export const requireCommunityAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session?.userId || (req.session.userRole !== 'community_admin' && req.session.userRole !== 'super_admin')) {
+    return res.status(403).json({ error: 'Community admin access required' });
   }
+  next();
+};
+
+export const requireSuperAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session?.userId || req.session.userRole !== 'super_admin') {
+    return res.status(403).json({ error: 'Super admin access required' });
+  }
+  next();
 };
 
 // Hash password

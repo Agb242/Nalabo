@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Activity, Plus, Settings, Trash2, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-context';
-import { useNavigate } from 'react-router-dom';
 
 interface KubernetesCluster {
   id: string;
@@ -37,7 +36,6 @@ interface InfrastructureMetrics {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [clusters, setClusters] = useState<KubernetesCluster[]>([]);
   const [metrics, setMetrics] = useState<InfrastructureMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,14 +49,14 @@ export default function AdminDashboard() {
     isDefault: false,
   });
 
-  // Vérifier les permissions admin
+  // Vérifier les permissions community admin
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      navigate('/dashboard');
+    if (!user || (user.role !== 'community_admin' && user.role !== 'super_admin')) {
+      window.location.href = '/dashboard';
       return;
     }
     loadDashboardData();
-  }, [user, navigate]);
+  }, [user]);
 
   const loadDashboardData = async () => {
     try {
@@ -164,10 +162,13 @@ export default function AdminDashboard() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Administration Infrastructure
+          {user?.role === 'super_admin' ? 'Administration Infrastructure' : 'Administration Communauté'}
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
-          Gestion des clusters Kubernetes et monitoring des ressources
+          {user?.role === 'super_admin' 
+            ? 'Gestion des clusters Kubernetes et monitoring des ressources'
+            : 'Gestion de votre communauté et ateliers premium'
+          }
         </p>
       </div>
 
@@ -221,11 +222,17 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <Tabs defaultValue="clusters" className="space-y-6">
+      <Tabs defaultValue={user?.role === 'super_admin' ? 'clusters' : 'workshops'} className="space-y-6">
         <TabsList>
-          <TabsTrigger value="clusters">Clusters Kubernetes</TabsTrigger>
-          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions Actives</TabsTrigger>
+          {user?.role === 'super_admin' && (
+            <>
+              <TabsTrigger value="clusters">Clusters Kubernetes</TabsTrigger>
+              <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+            </>
+          )}
+          <TabsTrigger value="workshops">Ateliers Premium</TabsTrigger>
+          <TabsTrigger value="members">Membres</TabsTrigger>
+          <TabsTrigger value="analytics">Analytiques</TabsTrigger>
         </TabsList>
 
         <TabsContent value="clusters" className="space-y-6">
@@ -371,17 +378,75 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="sessions">
+        <TabsContent value="workshops">
           <Card>
             <CardHeader>
-              <CardTitle>Sessions d'Ateliers Actives</CardTitle>
+              <CardTitle>Ateliers Premium</CardTitle>
               <CardDescription>
-                Sessions en cours d'exécution sur les clusters
+                Créez et gérez des ateliers avec privilèges étendus
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Privilèges Community Admin</h3>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Créer Atelier Premium
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">4h</div>
+                      <div className="text-sm text-gray-500">Durée maximale</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">4Gi</div>
+                      <div className="text-sm text-gray-500">RAM allouée</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">10Gi</div>
+                      <div className="text-sm text-gray-500">Stockage persistant</div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="members">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestion des Membres</CardTitle>
+              <CardDescription>
+                Administrez les membres de votre communauté
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center text-gray-500 py-8">
-                Liste des sessions actives en cours d'implémentation
+                Interface de gestion des membres en cours d'implémentation
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytiques Avancées</CardTitle>
+              <CardDescription>
+                Statistiques détaillées de votre communauté
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center text-gray-500 py-8">
+                Tableau de bord analytique en cours d'implémentation
               </div>
             </CardContent>
           </Card>

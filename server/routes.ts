@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import enhancedWorkshopRoutes from "./routes/enhanced-workshop-routes";
 import { adminRoutes } from "./routes/admin-routes";
 import { superAdminRoutes } from "./routes/super-admin-routes";
+import { communityAdminRoutes } from './routes/community-admin-routes';
 import { workshopManagementRoutes } from "./routes/workshop-management-routes";
 import { storage } from "./storage";
 import { insertUserSchema, insertWorkshopSchema, insertChallengeSchema, insertWorkshopSessionSchema, insertChallengeParticipationSchema } from "@shared/schema";
@@ -25,20 +26,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, email, password } = req.body;
       const bcrypt = await import('bcryptjs');
       const hashedPassword = await bcrypt.hash(password, 12);
-      
+
       // Direct SQL to bypass schema issues
       const result = await storage.pool.query(
         'INSERT INTO users (username, email, password, role, points) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, role, points, created_at',
         [username, email, hashedPassword, 'user', 0]
       );
-      
+
       const user = result.rows[0];
-      
+
       // Create session
       req.session.userId = user.id;
       req.session.userRole = user.role;
       req.session.username = user.username;
-      
+
       res.json({ user: { id: user.id, username: user.username, email: user.email, role: user.role, points: user.points } });
     } catch (error) {
       console.error('Create test user error:', error);
@@ -56,9 +57,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/workshops", enhancedWorkshopRoutes);
   app.use("/api/workshop-management", workshopManagementRoutes);
 
-  // Admin routes
-  app.use('/api/admin', adminRoutes);
-  app.use('/api/super-admin', superAdminRoutes);
+  // Routes admin
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/community-admin", communityAdminRoutes);
+  app.use("/api/super-admin", superAdminRoutes);
   app.use('/api/analytics', userStatsRoutes);
   app.use('/api/workshop-creation', workshopCreationRoutes);
   app.use('/api', userIsolationRoutes);
@@ -177,9 +179,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId!;
       const userRole = req.session.userRole;
       const communityId = req.session.communityId;
-      
+
       let workshops;
-      
+
       // Isolation stricte des données par rôle et communauté
       if (userRole === "super_admin") {
         workshops = await storage.getWorkshops();
@@ -189,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Utilisateur normal : uniquement ses propres ateliers
         workshops = await storage.getUserWorkshopsByUserId(userId);
       }
-      
+
       res.json(workshops);
     } catch (error) {
       console.error("Get workshops error:", error);
@@ -338,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/analytics/user-stats", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      
+
       // Version simplifiée pour éviter les erreurs de tables manquantes
       const user = await storage.getUser(userId);
       const userStats = {
@@ -349,7 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         communityRanking: 1,
         recentSessions: [],
       };
-      
+
       res.json(userStats);
     } catch (error) {
       console.error("Get user stats error:", error);
@@ -362,11 +364,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session.userId!;
       const user = await storage.getUser(userId);
-      
+
       if (!user?.communityId) {
         return res.json([]); // No community = empty leaderboard
       }
-      
+
       const leaderboard = await storage.getCommunityLeaderboard(user.communityId);
       res.json(leaderboard);
     } catch (error) {
