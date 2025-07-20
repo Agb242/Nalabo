@@ -51,7 +51,7 @@ export const registerSchema = insertUserSchema.extend({
 
 // Login schema
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Email invalide"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -108,9 +108,9 @@ export async function loginUser(req: Request, res: Response) {
     const validatedData = loginSchema.parse(req.body);
 
     // Find user
-    const user = await storage.getUserByUsername(validatedData.username);
+    const user = await storage.getUserByEmail(validatedData.email);
     if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // Verify password
