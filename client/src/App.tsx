@@ -16,6 +16,7 @@ import WorkshopBuilderEnhanced from "@/pages/workshop-builder-enhanced";
 import Dashboard from "@/pages/dashboard";
 import SecureDashboard from "@/pages/secure-dashboard";
 import Challenges from "@/pages/challenges";
+import Community from "@/pages/community";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/secure-dashboard" component={SecureDashboard} />
       <Route path="/challenges" component={Challenges} />
+      <Route path="/community" component={Community} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>

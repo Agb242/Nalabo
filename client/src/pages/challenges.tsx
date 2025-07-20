@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChallengeCard } from "@/components/challenges/challenge-card";
 import { Leaderboard } from "@/components/challenges/leaderboard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Challenge } from "@shared/schema";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Trophy, Target, Clock, Users, Star, Award, Zap, Crown, Medal, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/components/auth/auth-context';
 
 interface ChallengeWithExtras extends Challenge {
   participantCount: number;
@@ -12,6 +20,8 @@ interface ChallengeWithExtras extends Challenge {
 }
 
 export default function Challenges() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('challenges');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,48 +64,48 @@ export default function Challenges() {
   const mockChallenges: ChallengeWithExtras[] = [
     {
       id: 1,
-      title: "Docker Optimization Challenge",
-      description: "Optimisez une image Docker existante",
+      title: 'Docker Fundamentals Sprint',
+      description: 'Master containerization basics through hands-on workshops',
       creatorId: 1,
-      category: "docker",
-      difficulty: "intermediate",
-      points: 500,
-      deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-      isActive: true,
-      rules: {},
-      createdAt: new Date(),
-      participantCount: 127,
-      timeRemaining: "2j restants",
-    },
-    {
-      id: 2,
-      title: "CTF Cybersécurité",
-      description: "Capture The Flag - Sécurité web",
-      creatorId: 1,
-      category: "security",
-      difficulty: "advanced",
-      points: 750,
-      deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-      isActive: true,
-      rules: {},
-      createdAt: new Date(),
-      participantCount: 89,
-      timeRemaining: "5j restants",
-    },
-    {
-      id: 3,
-      title: "Machine Learning Pipeline",
-      description: "Créez un pipeline ML performant",
-      creatorId: 1,
-      category: "ai-ml",
-      difficulty: "expert",
-      points: 1000,
+      category: 'containers',
+      difficulty: 'Beginner',
+      points: 250,
       deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       isActive: true,
       rules: {},
       createdAt: new Date(),
-      participantCount: 56,
-      timeRemaining: "7j restants",
+      participantCount: 1847,
+      timeRemaining: '1 week',
+    },
+    {
+      id: 2,
+      title: 'Kubernetes Production Challenge',
+      description: 'Deploy and manage complex applications in K8s',
+      creatorId: 1,
+      category: 'orchestration',
+      difficulty: 'Advanced',
+      points: 750,
+      deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      isActive: true,
+      rules: {},
+      createdAt: new Date(),
+      participantCount: 345,
+      timeRemaining: '2 weeks',
+    },
+    {
+      id: 3,
+      title: 'AI/ML Pipeline Builder',
+      description: 'Build end-to-end machine learning pipelines',
+      creatorId: 1,
+      category: 'ai-ml',
+      difficulty: 'Advanced',
+      points: 900,
+      deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+      isActive: true,
+      rules: {},
+      createdAt: new Date(),
+      participantCount: 178,
+      timeRemaining: '3 weeks',
     },
   ];
 
@@ -108,54 +118,120 @@ export default function Challenges() {
   const displayChallenges = challenges || mockChallenges;
   const displayLeaderboard = leaderboard || mockLeaderboard;
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner': return 'bg-green-100 text-green-800';
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'Advanced': return 'bg-orange-100 text-orange-800';
+      case 'Expert': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-blue-100 text-blue-800';
+      case 'upcoming': return 'bg-purple-100 text-purple-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'containers': return '🐳';
+      case 'orchestration': return '☸️';
+      case 'ai-ml': return '🤖';
+      case 'devops': return '⚙️';
+      case 'security': return '🔒';
+      default: return '💻';
+    }
+  };
+
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1: return <Crown className="w-5 h-5 text-yellow-500" />;
+      case 2: return <Medal className="w-5 h-5 text-gray-400" />;
+      case 3: return <Medal className="w-5 h-5 text-orange-500" />;
+      default: return <span className="w-5 h-5 flex items-center justify-center text-sm font-bold text-gray-600">#{rank}</span>;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-800 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold mb-4 text-blue-800 dark:text-orange-500">
-            Défis Communautaires
-          </h1>
-          <p className="text-slate-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Participez aux défis techniques et montez dans le classement
+    <div className="min-h-screen bg-gradient-to-br from-nalabo-light via-white to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-nalabo-slate mb-4">Technical Challenges</h1>
+          <p className="text-lg text-gray-600">
+            Take on exciting challenges integrated with workshops and climb the leaderboard
           </p>
         </div>
-        
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Active Challenges */}
-          <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold mb-6 text-blue-800 dark:text-white">
-              Défis Actifs
-            </h2>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {displayChallenges.map((challenge) => (
-                  <ChallengeCard
-                    key={challenge.id}
-                    challenge={challenge}
-                    onParticipate={handleParticipate}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {/* Leaderboard */}
-          <div className="lg:col-span-1">
-            <Leaderboard
-              entries={displayLeaderboard}
-              currentUserRank={47}
-              currentUserPoints={892}
-            />
-          </div>
-        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 bg-white shadow-lg rounded-lg">
+            <TabsTrigger value="challenges">Active Challenges</TabsTrigger>
+            <TabsTrigger value="leaderboard">Global Leaderboard</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="challenges" className="space-y-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayChallenges.map((challenge) => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  onParticipate={handleParticipate}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="leaderboard" className="space-y-6">
+            <Card className="bg-white shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center text-nalabo-slate">
+                  <Trophy className="w-6 h-6 mr-2 text-yellow-500" />
+                  Global Leaderboard
+                </CardTitle>
+                <CardDescription>
+                  Top performers across all challenges and workshops
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {displayLeaderboard.map((member) => (
+                    <div key={member.rank} className={`flex items-center justify-between p-4 rounded-lg transition-all duration-200 hover:shadow-md ${
+                      member.rank <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200' : 'bg-gray-50 hover:bg-gray-100'
+                    }`}>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center justify-center w-10 h-10">
+                          {getRankIcon(member.rank)}
+                        </div>
+
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src="/api/placeholder/40/40" />
+                          <AvatarFallback>{member.username.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="font-semibold text-nalabo-slate">{member.username}</h4>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="font-bold text-lg text-nalabo-blue">
+                          {member.points.toLocaleString()} pts
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

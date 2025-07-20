@@ -88,8 +88,11 @@ export function Header() {
             <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
               Certifications
             </span>
-            <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
-              Marketplace
+            <span 
+              className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer"
+              onClick={() => navigate('/community')}
+            >
+              Community
             </span>
           </nav>
 
