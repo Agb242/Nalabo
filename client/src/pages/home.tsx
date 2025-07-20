@@ -199,7 +199,7 @@ export default function Home() {
 
             <h1 className="text-5xl md:text-7xl font-bold text-nalabo-slate mb-6 leading-tight">
               Master 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nalabo-orange to-nalabo-blue animate-pulse">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nalabo-orange via-nalabo-blue to-nalabo-emerald animate-tech-glow animate-gradient-shift">
                 {' '}Tech{' '}
               </span>
               Through Practice
@@ -267,13 +267,78 @@ export default function Home() {
               </p>
               <Button onClick={() => navigate('/workshops')}>See All Workshops</Button>
             </div>
-            <div>
-              {/* Replace with actual animated illustration */}
-              <img
-                src="/workshop-illustration.png" // Replace with your illustration asset
-                alt="Workshop Illustration"
-                className="rounded-lg shadow-lg"
-              />
+            <div className="relative">
+              {/* Animated Workshop Interface Preview */}
+              <div className="bg-white rounded-lg shadow-2xl p-6 border border-gray-200 transform hover:scale-105 transition-all duration-500">
+                {/* Mock Browser Header */}
+                <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200">
+                  <div className="flex space-x-1">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  </div>
+                  <div className="flex-1 bg-gray-100 rounded px-3 py-1 text-xs text-gray-500">
+                    nalabo.co/workshop/docker-basics
+                  </div>
+                </div>
+
+                {/* Workshop Content Preview */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-nalabo-blue rounded-lg flex items-center justify-center">
+                      <Container className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm">Docker Fundamentals</h3>
+                      <p className="text-xs text-gray-500">Interactive Container Workshop</p>
+                    </div>
+                  </div>
+
+                  {/* Code Editor Mock */}
+                  <div className="bg-gray-900 rounded-lg p-3 text-xs">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Code className="w-3 h-3 text-green-400" />
+                      <span className="text-green-400">Terminal</span>
+                    </div>
+                    <div className="text-green-400 font-mono space-y-1">
+                      <div className="animate-pulse">$ docker run -d --name workshop nginx</div>
+                      <div className="text-gray-400">Container started successfully ✓</div>
+                      <div className="animate-pulse delay-1000">$ docker ps</div>
+                    </div>
+                  </div>
+
+                  {/* Progress Indicators */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600">Progress</span>
+                      <span className="text-nalabo-blue font-semibold">Step 3/7</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-nalabo-orange to-nalabo-blue h-2 rounded-full animate-pulse" style={{width: '43%'}}></div>
+                    </div>
+                  </div>
+
+                  {/* Tools Panel */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-blue-50 rounded p-2 text-center">
+                      <Server className="w-4 h-4 mx-auto text-blue-600 mb-1" />
+                      <span className="text-xs text-blue-600">Kubernetes</span>
+                    </div>
+                    <div className="bg-orange-50 rounded p-2 text-center">
+                      <Container className="w-4 h-4 mx-auto text-orange-600 mb-1" />
+                      <span className="text-xs text-orange-600">Docker</span>
+                    </div>
+                    <div className="bg-green-50 rounded p-2 text-center">
+                      <GitBranch className="w-4 h-4 mx-auto text-green-600 mb-1" />
+                      <span className="text-xs text-green-600">CI/CD</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Elements */}
+              <div className="absolute -top-4 -right-4 w-16 h-16 bg-nalabo-orange/20 rounded-full animate-bounce delay-500"></div>
+              <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-nalabo-blue/20 rounded-full animate-bounce delay-1000"></div>
             </div>
           </div>
         </div>

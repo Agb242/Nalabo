@@ -37,16 +37,16 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-10 h-10 bg-orange-500 rounded-lg shadow-lg">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg animate-logo-float hover:animate-spin transition-all duration-300">
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5zM12 4.44L18.18 7 12 10.56 5.82 7 12 4.44zM4 8.18l7 4.08v8.34c-3.94-.64-7-4.19-7-8.6v-3.82zm16 7.82c0 4.41-3.06 7.96-7 8.6v-8.34l7-4.08v3.82z"/>
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-white">
+                <span className="text-xl font-bold text-nalabo-slate dark:text-white transition-colors duration-300 hover:text-orange-500">
                   Nalabo
                 </span>
-                <span className="text-xs text-gray-300">
+                <span className="text-xs text-gray-600 dark:text-gray-300">
                   Plateforme cloud-native de workshops Tech
                 </span>
               </div>
