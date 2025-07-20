@@ -1,81 +1,124 @@
-# Guide de Contribution
 
-Merci de votre intérêt pour le projet Nalabo ! Ce document explique comment contribuer au projet de manière efficace.
-
-## Avant de Commencer
-
-1. Vérifiez les [issues](https://github.com/your-org/Nalabo/issues) existantes pour éviter les doublons
-2. Pour les nouvelles fonctionnalités, ouvrez d'abord une issue pour discuter des changements proposés
-3. Assurez-vous d'avoir lu le [code de conduite](CODE_OF_CONDUCT.md)
+# Guide de Contribution Nalabo
 
 ## Processus de Contribution
 
 1. **Fork** le dépôt
-2. Créez une **branche** pour votre fonctionnalité :
-   ```bash
-   git checkout -b feature/nom-de-la-fonctionnalite
-   ```
-3. **Commitez** vos changements :
-   ```bash
-   git commit -m "feat: ajouter une nouvelle fonctionnalité"
-   ```
-4. **Poussez** vers votre fork :
-   ```bash
-   git push origin feature/nom-de-la-fonctionnalite
-   ```
-5. Créez une **Pull Request**
+2. **Branche** : `git checkout -b feature/nom-fonctionnalite`
+3. **Développement** avec tests
+4. **Commit** : [Conventional Commits](https://www.conventionalcommits.org/)
+5. **Push** : `git push origin feature/nom-fonctionnalite`
+6. **Pull Request** vers `main`
 
-## Conventions de Code
-
-### Messages de Commit
-
-Utilisez [Conventional Commits](https://www.conventionalcommits.org/) :
+## Types de Commits
 
 ```
-type(portée): description
-
-[corps optionnel]
-
-[pied de page optionnel]
+feat: nouvelle fonctionnalité
+fix: correction de bug
+docs: documentation
+style: formatage code
+refactor: refactoring
+test: ajout de tests
+chore: maintenance
 ```
 
-Types de commit :
-- `feat` : Nouvelle fonctionnalité
-- `fix` : Correction de bug
-- `docs` : Documentation
-- `style` : Mise en forme, point-virgule manquant, etc.
-- `refactor` : Refactoring du code
-- `test` : Ajout de tests
-- `chore` : Mise à jour des tâches de construction, gestionnaire de paquets, etc.
+## Standards de Code
 
-### Style de Code
+### TypeScript
+- Types stricts activés
+- Pas de `any` sauf exception justifiée
+- Interfaces préférées aux types
 
-- Suivez le [guide de style Airbnb](https://github.com/airbnb/javascript)
-- Utilisez Prettier pour le formatage du code
-- Maintenez une couverture de test élevée
-- Documentez les nouvelles fonctionnalités
+### React
+- Composants fonctionnels avec hooks
+- Props typées avec interfaces
+- Déstructuration recommandée
+
+### Backend
+- Validation des entrées avec Zod
+- Gestion d'erreurs centralisée
+- Logs structurés
 
 ## Tests
 
-- Écrivez des tests unitaires pour le nouveau code
-- Exécutez tous les tests avant de soumettre une PR
-- Assurez-vous que les tests passent sur toutes les plateformes supportées
+```bash
+# Lancer tous les tests
+pnpm test
+
+# Tests en mode watch
+pnpm test:watch
+
+# Couverture
+pnpm test:coverage
+```
+
+### Couverture Minimale
+- Nouvelles fonctionnalités : 80%
+- Corrections de bugs : Tests de régression
 
 ## Revue de Code
 
-- Les PR doivent être revues par au moins un mainteneur
-- Les commentaires de revue doivent être constructifs et respectueux
-- Répondez aux commentaires de revue et effectuez les modifications demandées
+### Checklist PR
+- [ ] Tests passent
+- [ ] Code linté
+- [ ] Documentation mise à jour
+- [ ] Types TypeScript corrects
+- [ ] Pas de console.log oubliés
 
-## Signalement de Problèmes
+### Critères d'Acceptation
+- Au moins 1 approbation
+- Tests CI passent
+- Conflicts résolus
+- Documentation à jour
 
-Utilisez le template d'issue fourni et incluez :
-- Description claire du problème
-- Étapes pour reproduire
-- Comportement attendu vs. réel
-- Captures d'écran si applicable
-- Version de l'application/navigateur/système d'exploitation
+## Issues
 
-## Questions ?
+### Template Bug
+```
+**Description**
+Description claire du problème
 
-Pour toute question, ouvrez une discussion ou contactez les mainteneurs via les issues.
+**Reproduction**
+1. Aller à '...'
+2. Cliquer sur '...'
+3. Voir l'erreur
+
+**Attendu vs Réel**
+- Attendu : ...
+- Réel : ...
+
+**Environnement**
+- OS : [ex: macOS]
+- Navigateur : [ex: Chrome 120]
+- Version Node : [ex: 20.10]
+```
+
+### Template Feature
+```
+**Fonctionnalité**
+Description de la fonctionnalité
+
+**Motivation**
+Pourquoi cette fonctionnalité est nécessaire
+
+**Solution Proposée**
+Comment implémenter cette fonctionnalité
+
+**Alternatives**
+Autres solutions considérées
+```
+
+## Priorités Actuelles
+
+### 🔴 Critique
+1. Interface admin fonctionnelle
+2. Workflow ateliers end-to-end
+3. Infrastructure Docker stable
+
+### 🟡 Important
+1. Tests d'intégration
+2. Documentation API
+3. Monitoring erreurs
+
+---
+*Questions ? Ouvrir une discussion GitHub*

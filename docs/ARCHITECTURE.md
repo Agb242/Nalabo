@@ -1,147 +1,123 @@
-# Architecture du Projet
-
-Ce document décrit l'architecture technique du projet Nalabo.
+# Architecture Technique Nalabo
 
 ## Vue d'Ensemble
 
-Nalabo suit une architecture modulaire organisée en plusieurs couches :
+Architecture monolithique modulaire avec séparation frontend/backend.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    Client (React)                   │
+│              Frontend (React)                       │
+│              client/src/                            │
 └───────────────────────────┬─────────────────────────┘
-                            │
+                            │ HTTP/REST
 ┌───────────────────────────▼─────────────────────────┐
-│                    API Gateway                      │
-└───────────────┬───────────────────┬─────────────────┘
-                │                   │
-┌───────────────▼───┐   ┌───────────▼───────────────┐
-│  Service Auth    │   │  Service Principal       │
-└───────────────────┘   └───────────────────────────┘
+│              Backend (Express)                      │
+│              server/src/                            │
+└───────────────────────────┬─────────────────────────┘
+                            │ SQL
+┌───────────────────────────▼─────────────────────────┐
+│           Database (PostgreSQL)                     │
+│               Neon Cloud                            │
+└─────────────────────────────────────────────────────┘
 ```
 
-## Technologies Principales
+## Stack Technique
 
 ### Frontend
-- **Framework** : React 18+
-- **Gestion d'état** : React Query
-- **Styling** : Tailwind CSS
-- **Routage** : React Router
-- **Validation** : Zod
+- **Framework** : React 18 + TypeScript
+- **Build** : Vite
+- **UI** : Tailwind CSS + shadcn/ui
+- **State** : React Query + Context
+- **Routing** : React Router
 
-### Backend
-- **Runtime** : Node.js
+### Backend  
+- **Runtime** : Node.js + TypeScript
 - **Framework** : Express.js
-- **Base de données** : PostgreSQL
-- **ORM** : Drizzle ORM
-- **Authentification** : JWT + sessions
+- **Database** : PostgreSQL (Neon) + Drizzle ORM
+- **Auth** : JWT + HTTP-Only cookies
 
-## Structure des Dossiers
+### Infrastructure
+- **Hosting** : Replit (développement)
+- **Database** : Neon (PostgreSQL serverless)
+- **Containers** : Docker (ateliers)
+- **Orchestration** : Kubernetes (prévu)
 
+## Modules Principaux
+
+### Frontend (`client/src/`)
 ```
-Nalabo/
-├── client/                 # Application frontend
-│   ├── src/
-│   │   ├── components/    # Composants réutilisables
-│   │   ├── pages/         # Pages de l'application
-│   │   ├── hooks/         # Hooks personnalisés
-│   │   ├── services/      # Appels API
-│   │   └── styles/        # Feuilles de style globales
-│
-├── server/                 # Application backend
-│   ├── src/
-│   │   ├── controllers/   # Contrôleurs
-│   │   ├── middleware/    # Middlewares
-│   │   ├── routes/        # Définition des routes
-│   │   ├── services/      # Logique métier
-│   │   └── utils/         # Utilitaires
-│
-├── shared/                # Code partagé
-│   ├── schemas/          # Schémas de validation
-│   └── types/            # Types TypeScript partagés
-│
-└── tests/                # Tests automatisés
-    ├── unit/            # Tests unitaires
-    ├── integration/     # Tests d'intégration
-    └── e2e/             # Tests end-to-end
+├── components/
+│   ├── auth/          # Authentification
+│   ├── ui/            # Composants réutilisables
+│   ├── workshop/      # Création d'ateliers
+│   └── layout/        # Layout principal
+├── pages/             # Pages de l'application
+├── hooks/             # Hooks personnalisés
+└── lib/               # Utilitaires
 ```
 
-## Flux de Données
+### Backend (`server/`)
+```
+├── routes/            # Endpoints API
+├── services/          # Logique métier
+├── middleware/        # Middlewares Express
+└── auth.ts            # Authentification JWT
+```
 
-1. **Authentification** :
-   - L'utilisateur se connecte via le formulaire d'authentification
-   - Le serveur valide les identifiants et renvoie un JWT
-   - Le token est stocké dans un cookie HTTP-Only
+### Partagé (`shared/`)
+```
+├── schema.ts          # Schémas base de données
+└── freemium-limits.ts # Limites par plan
+```
 
-2. **Requêtes API** :
-   - Le client envoie des requêtes avec le token dans le header
-   - Le middleware vérifie le token et attache l'utilisateur à la requête
-   - Le contrôleur traite la requête et renvoie une réponse
+## Base de Données
 
-3. Gestion des Erreurs :
-   - Middleware d'erreur centralisé
-   - Format standardisé des réponses d'erreur :
-     ```json
-     {
-       "success": false,
-       "error": {
-         "code": "ERROR_CODE",
-         "message": "Message d'erreur lisible",
-         "details": {}
-       }
-     }
-     ```
-   - Journalisation structurée des erreurs
-   - Documentation des codes d'erreur dans `/docs/ERRORS.md`
-   - Structure des dossiers d'issues :
-     ```
-     /issues
-       /001-database-connection
-         README.md       # Description du problème et contexte
-         solution.md     # Solution mise en place
-         screenshots/    # Captures d'écran si nécessaire
-         scripts/        # Scripts de correction
-     ```
+### Tables Principales
+- `users` - Utilisateurs et authentification
+- `workshops` - Ateliers créés
+- `workshop_sessions` - Sessions d'exécution
+- `challenges` - Défis techniques
+- `user_sessions` - Sessions utilisateur
 
-## Sécurité
+### Relations
+```sql
+users (1) → (n) workshops
+users (1) → (n) workshop_sessions  
+workshops (1) → (n) workshop_sessions
+```
 
-- Validation des entrées utilisateur
-- Protection contre les attaques CSRF
-- Headers de sécurité HTTP
-- Rate limiting
-- Hachage des mots de passe avec bcrypt
+## Authentification
 
-## Performance
+### Flow JWT
+1. Login → JWT généré + cookie HTTP-Only
+2. Requête → Middleware vérifie JWT
+3. Accès → User attaché à `req.user`
 
-- Mise en cache des données fréquemment accédées
-- Pagination des listes
-- Chargement paresseux des composants
-- Optimisation des images
-- Compression des réponses HTTP
+### Rôles
+- `user` - Utilisateur standard
+- `admin` - Administrateur plateforme
+- `super_admin` - Super administrateur
 
-## Évolutivité
+## 🚨 Problèmes Architecture Actuels
 
-- Architecture modulaire
-- Séparation claire des responsabilités
-- Configuration externalisée
-- Logs et monitoring
+### 1. Déconnexion Modules
+- `workshop-builder` (frontend) ↔ `workshop-orchestrator` (backend)
+- Création d'ateliers non liée à l'exécution
 
-## Problèmes Identifiés (18 décembre 2024)
+### 2. Infrastructure Instable
+- Service Kubernetes non opérationnel
+- Fallback Docker non robuste
 
-### 🔴 Critiques
-1. **Interface Admin Manquante** : Pas d'UI pour gérer les infrastructures K8s
-2. **Isolation des Données** : Dashboard non filtré par utilisateur
-3. **Workflow d'Ateliers** : Déconnexion entre création et exécution
-4. **Stabilité Base de Données** : Erreurs de connexion Neon fréquentes
+### 3. Isolation Incomplète
+- Certaines routes ne filtrent pas par `userId`
+- Risques de fuite de données
 
-### 🟡 Importantes
-- Gestion des erreurs de base de données
-- Système d'authentification admin
-- Monitoring des ressources K8s
-- Validation des templates d'ateliers
+## 🔧 Améliorations Prioritaires
 
-### Corrections Prioritaires
-1. Stabiliser la connexion base de données
-2. Créer l'interface admin backoffice
-3. Implémenter l'isolation des données utilisateur
-4. Corriger le workflow de création d'ateliers
+1. **Connecter Workflow Ateliers**
+2. **Stabiliser Infrastructure Docker**
+3. **Compléter Isolation Utilisateur**
+4. **Interface Admin Fonctionnelle**
+
+---
+*Architecture évolutive vers microservices si scaling nécessaire*

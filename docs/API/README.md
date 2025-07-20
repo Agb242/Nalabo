@@ -1,19 +1,95 @@
-# Documentation de l'API
 
-Ce dossier contient la documentation complète de l'API du projet Nalabo.
+# API Documentation
 
-## Structure
+## Base URL
+```
+http://localhost:5000/api
+```
 
-- `REST.md` : Standards et conventions REST
-- `ENDPOINTS.md` : Documentation complète des endpoints
-- `AUTHENTICATION.md` : Flux d'authentification et autorisation
-- `ERRORS.md` : Gestion des erreurs et codes d'état
+## Authentification
 
-## Standards
+### POST /auth/register
+```json
+{
+  "username": "string",
+  "email": "string", 
+  "password": "string"
+}
+```
 
-- Format des réponses : JSON
-- Authentification : JWT
-- Versionnage : Via le header `Accept`
-- Pagination : Utilisation de `limit` et `offset`
-- Filtrage : Paramètres de requête
-- Tri : Paramètre `sort` (ex: `?sort=created_at:desc`)
+### POST /auth/login
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+
+### GET /auth/me
+Retourne l'utilisateur connecté.
+
+### POST /auth/logout
+Déconnecte l'utilisateur.
+
+## Workshops
+
+### GET /workshops
+Liste les ateliers de l'utilisateur connecté.
+
+### POST /workshops
+```json
+{
+  "title": "string",
+  "description": "string",
+  "category": "string",
+  "difficulty": "beginner|intermediate|advanced",
+  "duration": "number",
+  "steps": []
+}
+```
+
+### GET /workshops/:id
+Récupère un atelier spécifique.
+
+### PUT /workshops/:id
+Met à jour un atelier.
+
+### DELETE /workshops/:id
+Supprime un atelier.
+
+## Challenges
+
+### GET /challenges/active
+Liste les défis actifs.
+
+### GET /leaderboard
+Classement des utilisateurs.
+
+## Réponses API
+
+### Succès
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+### Erreur
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Description de l'erreur"
+  }
+}
+```
+
+## Codes d'Erreur
+
+- `NOT_AUTHENTICATED` (401) - Non authentifié
+- `FORBIDDEN` (403) - Accès refusé
+- `NOT_FOUND` (404) - Ressource non trouvée
+- `VALIDATION_ERROR` (400) - Données invalides
+- `INTERNAL_ERROR` (500) - Erreur serveur

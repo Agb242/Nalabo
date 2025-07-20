@@ -1,123 +1,102 @@
-# Guide de Développement
-
-Ce document explique comment configurer l'environnement de développement et les bonnes pratiques à suivre.
+# Guide de Développement Nalabo
 
 ## Prérequis
 
-- Node.js (version 20+)
-- PostgreSQL (version 15+)
-- pnpm (gestionnaire de paquets)
+- Node.js 20+
+- pnpm
+- Compte Neon Database (PostgreSQL)
 
 ## Installation
 
 ```bash
-# Cloner le dépôt
+# Cloner et installer
 git clone [url-du-depot]
 cd Nalabo
-
-# Installer les dépendances
 pnpm install
 
-# Copier le fichier .env.example vers .env
+# Configuration environnement
 cp .env.example .env
-
-# Configurer les variables d'environnement
-# Éditer le fichier .env avec vos paramètres
 ```
 
-## Démarrage en développement
+### Variables d'environnement requises
+
+```env
+DATABASE_URL="postgresql://..."
+JWT_SECRET="votre-secret-jwt"
+NODE_ENV="development"
+```
+
+## Démarrage
 
 ```bash
-# Démarrer le serveur de développement
+# Développement (frontend + backend)
 pnpm dev
 
-# Lancer les tests
+# Tests
 pnpm test
 
-# Lancer le linter
+# Linting
 pnpm lint
-
-# Lancer le formateur de code
-pnpm format
 ```
 
 ## Structure du Projet
 
 ```
 Nalabo/
-├── client/           # Code source du frontend
-├── server/           # Code source du backend
-├── shared/           # Code partagé entre le frontend et le backend
-├── public/           # Fichiers statiques
-├── tests/            # Tests automatisés
-└── docs/             # Documentation du projet
+├── client/           # Frontend React + TypeScript
+├── server/           # Backend Express + TypeScript  
+├── shared/           # Types et schémas partagés
+├── docs/             # Documentation
+└── migrations/       # Migrations base de données
 ```
 
-## Bonnes Pratiques
+## 🎯 Fonctionnalités par État
 
-- Suivre les conventions de commit (Conventional Commits)
-- Écrire des tests unitaires pour les nouvelles fonctionnalités
-- Documenter le code avec JSDoc
-- Garder les commits atomiques et bien décrits
-- Créer des branches avec la convention : `type/description-courte`
+### ✅ Opérationnel
+- **Authentification** : JWT + sessions HTTP-Only
+- **Base de données** : PostgreSQL avec Drizzle ORM
+- **Frontend** : React 18 + TypeScript + Tailwind
+- **API** : Routes auth, users, workshops, challenges
+- **Dashboard** : Interface utilisateur de base
 
-## Gestion des Branches
+### 🔧 En Développement
+- **Interface Admin** : Routes existent, UI à créer
+- **Workflow Ateliers** : Déconnexion création/exécution
+- **Infrastructure K8s** : Service non stable
+- **Isolation Données** : Filtrage utilisateur incomplet
 
-- `main` : Branche principale (production)
-- `staging` : Branche de pré-production
-- `feature/*` : Nouvelles fonctionnalités
-- `fix/*` : Corrections de bugs
-- `docs/*` : Mises à jour de documentation
+## 🐛 Problèmes Connus
 
-## Tests
+### Critique
+1. **Interface Admin Manquante** → `client/src/pages/admin-dashboard.tsx` à compléter
+2. **Workflow Ateliers Cassé** → Connecter `workshop-builder` à `workshop-orchestrator`
+3. **Infrastructure K8s** → Service `kubernetes-infrastructure.ts` instable
 
+### Corrections Prioritaires
 ```bash
-# Lancer tous les tests
-pnpm test
+# 1. Vérifier connexion DB
+npm run check-db
 
-# Lancer les tests en mode watch
-pnpm test:watch
+# 2. Créer utilisateur admin
+node scripts/create-admin.js
 
-# Générer un rapport de couverture
-pnpm test:coverage
+# 3. Tester isolation utilisateur
+# Vérifier que les routes filtrent par userId
 ```
 
-## Débogage
+## 🔄 Workflow de Développement
 
-Pour déboguer le serveur :
+1. **Branches** : `feature/nom-fonctionnalite`
+2. **Commits** : [Conventional Commits](https://www.conventionalcommits.org/)
+3. **Tests** : Obligatoires pour nouvelles fonctionnalités
+4. **Review** : PR requise pour `main`
 
-1. Ajouter `debugger` dans votre code
-2. Lancer `pnpm debug`
-3. Ouvrir Chrome/Edge à l'adresse `chrome://inspect`
-4. Cliquer sur "Open dedicated DevTools for Node"
+## 📊 Métriques Techniques
 
-## État Actuel du Projet (18 décembre 2024)
+- **Pages Frontend** : 9 pages principales
+- **Routes API** : 15+ endpoints
+- **Composants UI** : 50+ composants
+- **Services Backend** : 7 services principaux
 
-### ✅ Fonctionnalités Opérationnelles
-- Système d'authentification utilisateur
-- Interface de création d'ateliers (frontend)
-- Base de données PostgreSQL avec Neon
-- Architecture modulaire backend/frontend
-- Composants UI avec Tailwind CSS
-
-### ⚠️ Problèmes Identifiés
-- Interface admin manquante
-- Isolation des données utilisateur incomplète
-- Workflow d'ateliers non fonctionnel
-- Erreurs de connexion base de données
-
-### 🔧 En Cours de Correction
-- Stabilisation de la connexion Neon
-- Création de l'interface admin
-- Implémentation de l'isolation des données
-- Correction du workflow d'ateliers
-
-### 📊 Métriques Actuelles
-- Pages frontend : 8 pages principales
-- Routes API : 15+ endpoints
-- Composants UI : 35+ composants
-- Services backend : 5 services principaux
-
-## Questions ?
-
-Pour toute question, ouvrez une discussion ou contacte
+---
+*Pour questions techniques, ouvrir une issue GitHub*

@@ -1,37 +1,50 @@
-# Documentation du Projet Nalabo
 
-Bienvenue dans la documentation du projet Nalabo. Cette documentation est organisée de manière à faciliter la compréhension et la contribution au projet.
+# Documentation Nalabo
 
-## Structure de la Documentation
+Nalabo est une plateforme française cloud-native pour l'apprentissage technologique par la pratique.
 
+## 📚 Documentation Essentielle
+
+### Pour les Développeurs
+- [**DEVELOPMENT.md**](DEVELOPMENT.md) - Guide de développement et configuration
+- [**ARCHITECTURE.md**](ARCHITECTURE.md) - Architecture technique du projet
+- [**API/**](API/) - Documentation des endpoints API
+
+### Business & Produit
+- [**PRD_NALABO.md**](PRD_NALABO.md) - Product Requirements Document complet
+
+## 🚀 Démarrage Rapide
+
+```bash
+# Installation
+pnpm install
+
+# Configuration
+cp .env.example .env
+# Éditer .env avec vos paramètres
+
+# Lancement
+pnpm dev
 ```
-docs/
-├── DEVELOPMENT.md     # Guide de développement
-├── API/              # Documentation de l'API
-│   ├── REST.md       # Spécifications REST
-│   └── ENDPOINTS.md  # Liste des endpoints
-├── ARCHITECTURE.md   # Architecture du projet
-├── DEPLOYMENT.md     # Guide de déploiement
-├── GETTING_STARTED.md # Guide de démarrage
-├── ISSUES.md         # Gestion des issues
-└── CONTRIBUTING.md   # Guide de contribution
-```
 
-## Comment contribuer à la documentation
+## 📊 État Actuel (Décembre 2024)
 
-1. Modifiez les fichiers Markdown dans le dossier `docs/`
-2. Suivez les conventions de style Markdown
-3. Vérifiez la cohérence avec les autres documents
-4. Soumettez une Pull Request
+### ✅ Opérationnel
+- Authentification utilisateur
+- Interface React moderne
+- Base de données PostgreSQL
+- Dashboard utilisateur
+- Système de rôles
 
-## Mise à jour
+### 🔧 En Développement
+- Interface admin complète
+- Workflow d'ateliers end-to-end
+- Infrastructure Kubernetes stable
+- Marketplace d'ateliers
 
-Dernière mise à jour : 18 décembre 2024
+## 🤝 Contribution
 
-### Avancées du 18 décembre 2024
+Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les guidelines de contribution.
 
-- ✅ **Analyse complète du workflow d'ateliers** : Identification des incohérences dans le flux de création
-- ✅ **Audit de l'isolation des données utilisateur** : Problèmes détectés dans le filtrage par utilisateur
-- ✅ **Diagnostic des problèmes de base de données** : Erreurs de connexion Neon identifiées
-- ✅ **Évaluation du système d'administration** : Interface backoffice manquante identifiée
-- ✅ **Plan de corrections prioritaires** : Roadmap définie pour stabiliser la plateforme
+---
+*Dernière mise à jour : 18 décembre 2024*
