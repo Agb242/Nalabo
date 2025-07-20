@@ -27,7 +27,9 @@ import {
   Target,
   Layers,
   Phone,
-  Mail
+  Mail,
+  FolderOpen,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-context';
 import { useLanguage } from '@/contexts/language-context';
