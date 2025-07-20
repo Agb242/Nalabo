@@ -75,7 +75,7 @@ export async function registerUser(req: Request, res: Response) {
     // Hash password
     const hashedPassword = await hashPassword(validatedData.password);
 
-    // Create user
+    // Create user (excluding subscription and permissions for now)
     const user = await storage.createUser({
       username: validatedData.username,
       email: validatedData.email,

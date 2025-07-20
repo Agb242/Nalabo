@@ -11,8 +11,14 @@ import { z } from "zod";
 import { userStatsRoutes } from './routes/user-stats-routes';
 import { workshopCreationRoutes } from './routes/workshop-creation-routes';
 import { userIsolationRoutes } from './routes/user-isolation-routes';
+import { enforceUserIsolation, filterResponseByRole, isolateUserMetrics } from './middleware/user-isolation';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Apply user isolation middleware globally to API routes
+  app.use('/api', enforceUserIsolation);
+  app.use('/api', filterResponseByRole);
+  app.use('/api', isolateUserMetrics);
+
   // Auth routes
   app.post("/api/auth/register", registerUser);
   app.post("/api/auth/login", loginUser);
@@ -141,15 +147,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/workshops", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!;
+      const userRole = req.session.userRole;
+      const communityId = req.session.communityId;
+      
       let workshops;
-      // If admin, get all workshops; otherwise, get only user's workshops
-      if (req.session.userRole === "admin") {
+      
+      // Isolation stricte des données par rôle et communauté
+      if (userRole === "super_admin") {
         workshops = await storage.getWorkshops();
+      } else if (userRole === "community_admin" && communityId) {
+        workshops = await storage.getWorkshopsByCommunity(communityId);
       } else {
-        workshops = await storage.getUserWorkshopsByUserId(req.session.userId!);
+        // Utilisateur normal : uniquement ses propres ateliers
+        workshops = await storage.getUserWorkshopsByUserId(userId);
       }
+      
       res.json(workshops);
     } catch (error) {
+      console.error("Get workshops error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -291,8 +307,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Analytics routes
-  app.get("/api/analytics/stats", async (req, res) => {
+  // Analytics routes - Isolated user stats only
+  app.get("/api/analytics/user-stats", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const userStats = await storage.getUserStats(userId);
+      res.json(userStats);
+    } catch (error) {
+      console.error("Get user stats error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Community leaderboard - Only show community ranking
+  app.get("/api/analytics/community-leaderboard", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.communityId) {
+        return res.json([]); // No community = empty leaderboard
+      }
+      
+      const leaderboard = await storage.getCommunityLeaderboard(user.communityId);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Get community leaderboard error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Legacy analytics route for admin only
+  app.get("/api/analytics/stats", requireAdmin, async (req, res) => {
     try {
       const stats = await storage.getAnalyticsStats();
       res.json(stats);

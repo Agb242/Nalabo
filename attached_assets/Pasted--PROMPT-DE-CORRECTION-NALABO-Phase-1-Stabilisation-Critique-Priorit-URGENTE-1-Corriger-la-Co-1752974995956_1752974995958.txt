@@ -1,0 +1,91 @@
+🎯 PROMPT DE CORRECTION NALABO
+Phase 1 : Stabilisation Critique (Priorité URGENTE)
+1. Corriger la Connexion Base de Données
+Objectif : Éliminer les timeouts et reconnexions
+Actions :
+
+Configurer pool de connexions Neon optimisé
+Ajouter retry logic automatique
+Implémenter healthcheck DB
+2. Créer Interface Admin Minimale
+Objectif : Permettre la configuration des clusters K8s
+Actions :
+
+Page admin pour gestion clusters
+Monitoring sessions actives en temps réel
+Interface de configuration Infrastructure Manager
+3. Implémenter Isolation Utilisateur Complète
+Objectif : Sécuriser les données par utilisateur
+Actions :
+
+Filtrer TOUTES les requêtes par userId
+Sécuriser les endpoints avec middleware d'ownership
+Isoler métriques dashboard par utilisateur
+Phase 2 : Reconnexion du Workflow d'Ateliers
+4. Connecter WorkshopBuilder à l'Orchestrateur
+Objectif : Rétablir le flow création → exécution
+Actions :
+
+Intégrer sauvegarde avec EnhancedWorkshopOrchestrator
+Valider templates avant sauvegarde
+Synchroniser création/exécution d'ateliers
+5. Implémenter Système de Preview
+Objectif : Permettre test des ateliers avant publication
+Actions :
+
+Modal de preview avec simulation environnement
+Validation des étapes en mode test
+Aperçu rendu final utilisateur
+Phase 3 : Cohérence Documentation ↔ Code
+6. Synchroniser Features Documentées
+Objectif : Aligner doc et implémentation
+Actions :
+
+Marquer clairement features "En développement" dans la doc
+Implémenter gamification de base (points simples)
+Créer système de certification minimal
+7. Optimiser Infrastructure K8s
+Objectif : Stabiliser vCluster et monitoring
+Actions :
+
+Améliorer gestion lifecycle vCluster
+Ajouter métriques ressources temps réel
+Implémenter cleanup automatique sessions expirées
+Prompt Technique Spécifique :
+"Corrige les incohérences critiques du projet Nalabo en 3 phases prioritaires :
+PHASE 1 (URGENT) :
+1. Stabilise la connexion Neon PostgreSQL avec pool optimisé et retry logic
+2. Crée une interface admin minimale pour gérer les clusters K8s et monitorer les sessions
+3. Sécurise l'isolation des données utilisateur avec filtrage systématique par userId
+PHASE 2 (FONCTIONNEL) :
+4. Reconnecte WorkshopBuilder à EnhancedWorkshopOrchestrator pour un workflow cohérent
+5. Implémente un système de preview d'ateliers avant publication
+6. Ajoute validation des templates et gestion d'erreurs robuste
+PHASE 3 (COHÉRENCE) :
+7. Synchronise la documentation avec l'état réel du code
+8. Implémente les features de base documentées (gamification simple)
+9. Optimise l'infrastructure K8s avec monitoring temps réel
+Chaque correction doit :
+- Maintenir la compatibilité existante
+- Ajouter des tests unitaires
+- Inclure gestion d'erreurs appropriée
+- Respecter l'architecture modulaire
+- Conserver les performances
+Focus sur la stabilité et l'utilisabilité avant les features avancées."
+Critères de Validation :
+✅ Phase 1 Réussie :
+
+Plus d'erreurs de connexion DB
+Interface admin accessible et fonctionnelle
+Dashboard affiche uniquement les données de l'utilisateur connecté
+✅ Phase 2 Réussie :
+
+Création d'atelier → sauvegarde → exécution fonctionne end-to-end
+Preview d'ateliers opérationnel
+Validation templates robuste
+✅ Phase 3 Réussie :
+
+Documentation alignée avec le code
+Features documentées implémentées ou marquées "En développement"
+Infrastructure stable avec monitoring
+Ce prompt priorise la stabilité et la fonctionnalité core avant d'ajouter de nouvelles features, garantissant une base solide pour le développement futur de Nalabo.

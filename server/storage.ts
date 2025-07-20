@@ -99,25 +99,81 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const [user] = await db.select({
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      password: users.password,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+      avatar: users.avatar,
+      points: users.points,
+      createdAt: users.createdAt,
+    }).from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await db.select({
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      password: users.password,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+      avatar: users.avatar,
+      points: users.points,
+      createdAt: users.createdAt,
+    }).from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db.select({
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      password: users.password,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+      avatar: users.avatar,
+      points: users.points,
+      createdAt: users.createdAt,
+    }).from(users).where(eq(users.email, email));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    // Create user without problematic columns for now
+    const userToInsert = {
+      username: insertUser.username,
+      email: insertUser.email,
+      password: insertUser.password,
+      firstName: insertUser.firstName,
+      lastName: insertUser.lastName,
+      role: insertUser.role || "user",
+      avatar: insertUser.avatar,
+      points: insertUser.points || 0,
+    };
+    
     const [user] = await db
       .insert(users)
-      .values(insertUser)
-      .returning();
+      .values(userToInsert)
+      .returning({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        password: users.password,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        avatar: users.avatar,
+        points: users.points,
+        createdAt: users.createdAt,
+      });
     return user;
   }
 
@@ -291,9 +347,13 @@ export class DatabaseStorage implements IStorage {
     return workshops.length;
   }
 
-  // User-specific data isolation methods
+  // User-specific data isolation methods with community filtering
   async getUserWorkshopsByUserId(userId: number): Promise<Workshop[]> {
     return await db.select().from(workshops).where(eq(workshops.creatorId, userId));
+  }
+
+  async getWorkshopsByCommunity(communityId: number): Promise<Workshop[]> {
+    return await db.select().from(workshops).where(eq(workshops.communityId, communityId));
   }
 
   async getUserSessionsByUserId(userId: number): Promise<WorkshopSession[]> {
@@ -302,6 +362,59 @@ export class DatabaseStorage implements IStorage {
 
   async getUserChallengesByUserId(userId: number): Promise<Challenge[]> {
     return await db.select().from(challenges).where(eq(challenges.creatorId, userId));
+  }
+
+  // Métriques isolées par utilisateur et communauté
+  async getUserStats(userId: number): Promise<any> {
+    const userWorkshops = await this.getUserWorkshopsByUserId(userId);
+    const userSessions = await this.getUserSessionsByUserId(userId);
+    const userChallenges = await this.getUserChallengesByUserId(userId);
+    
+    // Calculer les points et le classement uniquement dans la communauté
+    const user = await this.getUser(userId);
+    let communityRanking = 1;
+    
+    if (user?.communityId) {
+      const communityUsers = await db
+        .select({ id: users.id, points: users.points })
+        .from(users)
+        .where(eq(users.communityId, user.communityId))
+        .orderBy(desc(users.points));
+      
+      communityRanking = communityUsers.findIndex(u => u.id === userId) + 1;
+    }
+    
+    return {
+      totalWorkshops: userWorkshops.length,
+      completedSessions: userSessions.filter(s => s.status === 'completed').length,
+      totalChallenges: userChallenges.length,
+      points: user?.points || 0,
+      communityRanking,
+      recentSessions: userSessions.slice(-5),
+    };
+  }
+
+  // Classement communautaire isolé
+  async getCommunityLeaderboard(communityId: number, limit: number = 10): Promise<any[]> {
+    const leaderboard = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        points: users.points,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.communityId, communityId))
+      .orderBy(desc(users.points))
+      .limit(limit);
+    
+    return leaderboard.map((entry, index) => ({
+      rank: index + 1,
+      id: entry.id,
+      username: entry.username,
+      points: entry.points || 0,
+      role: entry.role,
+    }));
   }
 
   // Kubernetes Infrastructure Management
