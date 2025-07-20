@@ -60,11 +60,11 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 
 pool.on('error', async (err) => {
   console.error('Database connection error:', err);
-  
+
   if (err.message.includes('terminating connection') || err.code === 'ECONNRESET') {
     reconnectAttempts++;
     console.log(`🔄 Tentative de reconnexion ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
-    
+
     if (reconnectAttempts <= MAX_RECONNECT_ATTEMPTS) {
       setTimeout(async () => {
         try {

@@ -31,8 +31,7 @@ import {
   Settings,
   Terminal,
   FileText,
-  Package,
-  GitBranch
+  Package
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-context';
 import { useLanguage } from '@/contexts/language-context';
@@ -454,10 +453,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-nalabo-slate mb-4">
-              Why Choose Nalabo?
+              {t('features.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Built for modern development teams and enterprise scale
+              {t('features.description')}
             </p>
           </div>
 
@@ -565,10 +564,10 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-nalabo-slate mb-4">
-              Trusted by Leading Teams
+              {t('testimonials.title')}
             </h2>
             <p className="text-xl text-gray-600">
-              See what engineering leaders say about Nalabo
+              {t('testimonials.description')}
             </p>
           </div>
 

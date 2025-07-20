@@ -59,7 +59,7 @@ export class KubernetesService {
   }> {
     try {
       const { name, namespace, resources, tools } = config;
-      
+
       // Create namespace if it doesn't exist
       await this.createNamespace(namespace);
 
@@ -139,10 +139,10 @@ export class KubernetesService {
       const listCommand = namespace 
         ? `vcluster list --namespace ${namespace} --output json`
         : `vcluster list --output json`;
-      
+
       const { stdout } = await execAsync(listCommand);
       const result = JSON.parse(stdout);
-      
+
       return result.vclusters || [];
     } catch (error) {
       console.error('Failed to list vClusters:', error);
@@ -166,7 +166,7 @@ export class KubernetesService {
       const statusCommand = `vcluster list --namespace ${namespace} --output json`;
       const { stdout } = await execAsync(statusCommand);
       const result = JSON.parse(stdout);
-      
+
       const vcluster = result.vclusters?.find((vc: any) => vc.name === name);
       if (!vcluster) {
         return { status: 'not_found' };
@@ -179,7 +179,7 @@ export class KubernetesService {
         const lines = resourceOutput.trim().split('\n');
         let totalCpu = 0;
         let totalMemory = 0;
-        
+
         lines.forEach(line => {
           const parts = line.split(/\s+/);
           if (parts.length >= 3) {
@@ -287,7 +287,7 @@ data:
     try {
       const config = yaml.load(kubeconfig) as any;
       const cluster = config.clusters?.[0]?.cluster;
-      
+
       return {
         endpoint: cluster?.server,
         name: config.clusters?.[0]?.name,
@@ -327,6 +327,23 @@ data:
     } finally {
       // Nettoyer le fichier temporaire
       await fs.unlink(tempKubeconfigPath).catch(() => {});
+    }
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      // Check if kubectl is available
+      const checkKubectl = await this.executeCommand('which kubectl').catch(() => ({ success: false }));
+      if (!checkKubectl.success) {
+        console.warn('⚠️  kubectl not available in environment - Kubernetes features disabled');
+        return false;
+      }
+
+      const result = await this.executeCommand('kubectl version --client');
+      return result.success;
+    } catch (error) {
+      console.error('Kubernetes heartbeat failed:', error);
+      return false;
     }
   }
 }

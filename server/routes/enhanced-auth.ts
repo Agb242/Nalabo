@@ -165,7 +165,7 @@ router.post('/communities',
   async (req, res) => {
     try {
       const { name, description, subscription, resourceLimits } = req.body;
-      
+
       const communityData = {
         name,
         description,
@@ -227,7 +227,7 @@ router.get('/communities/:communityId/members',
   async (req, res) => {
     try {
       const communityId = parseInt(req.params.communityId);
-      
+
       // Check if user has access to this community
       if (req.user!.role === 'admin' && req.user!.communityId !== communityId) {
         return res.status(403).json({ error: 'Access denied to this community' });
