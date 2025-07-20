@@ -25,12 +25,17 @@ export const translations: Translations = {
       logout: 'Déconnexion',
       register: 'Inscription'
     },
-    // Hero Section
+    // Hero Section  
     hero: {
       title: 'Master Tech Through Practice',
-      subtitle: 'La plateforme cloud-native pour des ateliers techniques immersifs. Formez vos équipes sur Docker, Kubernetes, IA/ML et les technologies de pointe.',
+      subtitle: 'La plateforme cloud-native pour des ateliers techniques immersifs',
+      description: 'Formez vos équipes sur Docker, Kubernetes, IA/ML et les technologies cloud avec des environnements interactifs et sécurisés.',
       startFree: 'Commencer Gratuitement',
-      exploreWorkshops: 'Explorer les Ateliers'
+      exploreWorkshops: 'Explorer les Ateliers',
+      startJourney: 'Démarrer votre Parcours',
+      freeToStart: 'Gratuit pour commencer',
+      noCreditCard: 'Aucune carte de crédit requise',
+      enterpriseReady: 'Prêt pour l\'entreprise'
     },
     // Workshop Section
     workshops: {
@@ -66,6 +71,62 @@ export const translations: Translations = {
       deployments: 'Déploiements',
       configMaps: 'ConfigMaps',
       secrets: 'Secrets'
+    },
+    // Stats & Features
+    stats: {
+      activeUsers: 'Utilisateurs Actifs',
+      workshopsCompleted: 'Ateliers Terminés', 
+      companiesUsing: 'Entreprises Utilisatrices',
+      successRate: 'Taux de Réussite'
+    },
+    features: {
+      whyChoose: 'Pourquoi Choisir Nalabo?',
+      builtFor: 'Conçu pour les équipes de développement modernes et l\'échelle d\'entreprise',
+      enterpriseUseCases: 'Cas d\'Usage Entreprise',
+      accelerateTeams: 'Découvrez comment les entreprises leaders utilisent Nalabo pour accélérer leurs équipes'
+    },
+    // Pricing & Plans
+    pricing: {
+      freemium: 'Gratuit',
+      enterprise: 'Entreprise',
+      custom: 'Sur Mesure',
+      perfectFor: 'Parfait pour les développeurs individuels',
+      forTeams: 'Pour les équipes et organisations',
+      contactSales: 'Contacter les Ventes'
+    },
+    // Community & Admin
+    community: {
+      management: 'Gestion des Communautés',
+      members: 'Membres',
+      settings: 'Paramètres',
+      permissions: 'Permissions',
+      createCommunity: 'Créer une Communauté',
+      joinCommunity: 'Rejoindre une Communauté'
+    },
+    // Authentication
+    auth: {
+      login: 'Se Connecter',
+      register: 'S\'inscrire',
+      logout: 'Se Déconnecter',
+      profile: 'Profil',
+      settings: 'Paramètres',
+      adminDashboard: 'Tableau de Bord Admin',
+      superAdminDashboard: 'Tableau de Bord Super Admin',
+      accessDenied: 'Accès Refusé',
+      insufficientPermissions: 'Permissions insuffisantes'
+    },
+    // Infrastructure
+    infrastructure: {
+      management: 'Gestion de l\'Infrastructure',
+      kubernetes: 'Gestion Kubernetes',
+      clusters: 'Clusters',
+      namespaces: 'Espaces de Noms',
+      monitoring: 'Surveillance',
+      resources: 'Ressources',
+      status: 'État',
+      healthy: 'Sain',
+      unhealthy: 'Défaillant',
+      maintenance: 'Maintenance'
     },
     // Common
     common: {
@@ -105,13 +166,18 @@ export const translations: Translations = {
     // Hero Section
     hero: {
       title: 'Master Tech Through Practice',
-      subtitle: 'The cloud-native platform for immersive technical workshops. Train your teams on Docker, Kubernetes, AI/ML and cutting-edge technologies.',
-      startFree: 'Start Free Today',
-      exploreWorkshops: 'Explore Workshops'
+      subtitle: 'The cloud-native platform for immersive technical workshops',
+      description: 'Train your teams on Docker, Kubernetes, AI/ML and cloud technologies with interactive and secure environments.',
+      startFree: 'Start Free',
+      exploreWorkshops: 'Explore Workshops',
+      startJourney: 'Start Your Journey',
+      freeToStart: 'Free to start',
+      noCreditCard: 'No credit card required',
+      enterpriseReady: 'Enterprise ready'
     },
     // Workshop Section
     workshops: {
-      title: 'Explore Our Interactive Workshops',
+      title: 'Explore our Interactive Workshops',
       description: 'Dive into hands-on learning with pre-configured environments and real-world scenarios. Our workshops cover everything from Docker and Kubernetes to AI/ML and cybersecurity.',
       seeAll: 'See All Workshops',
       dockerFundamentals: 'Docker Fundamentals',
@@ -127,6 +193,62 @@ export const translations: Translations = {
       aiml: 'AI/ML',
       cloud: 'Cloud',
       devops: 'DevOps'
+    },
+    // Stats & Features
+    stats: {
+      activeUsers: 'Active Users',
+      workshopsCompleted: 'Workshops Completed',
+      companiesUsing: 'Companies Using',
+      successRate: 'Success Rate'
+    },
+    features: {
+      whyChoose: 'Why Choose Nalabo?',
+      builtFor: 'Built for modern development teams and enterprise scale',
+      enterpriseUseCases: 'Enterprise Use Cases',
+      accelerateTeams: 'See how leading companies use Nalabo to accelerate their teams'
+    },
+    // Pricing & Plans
+    pricing: {
+      freemium: 'Free',
+      enterprise: 'Enterprise',
+      custom: 'Custom',
+      perfectFor: 'Perfect for individual developers',
+      forTeams: 'For teams and organizations',
+      contactSales: 'Contact Sales'
+    },
+    // Community & Admin
+    community: {
+      management: 'Community Management',
+      members: 'Members',
+      settings: 'Settings',
+      permissions: 'Permissions',
+      createCommunity: 'Create Community',
+      joinCommunity: 'Join Community'
+    },
+    // Authentication
+    auth: {
+      login: 'Login',
+      register: 'Register',
+      logout: 'Logout',
+      profile: 'Profile',
+      settings: 'Settings',
+      adminDashboard: 'Admin Dashboard',
+      superAdminDashboard: 'Super Admin Dashboard',
+      accessDenied: 'Access Denied',
+      insufficientPermissions: 'Insufficient Permissions'
+    },
+    // Infrastructure
+    infrastructure: {
+      management: 'Infrastructure Management',
+      kubernetes: 'Kubernetes Management',
+      clusters: 'Clusters',
+      namespaces: 'Namespaces',
+      monitoring: 'Monitoring',
+      resources: 'Resources',
+      status: 'Status',
+      healthy: 'Healthy',
+      unhealthy: 'Unhealthy',
+      maintenance: 'Maintenance'
     },
     // Super Admin
     superAdmin: {

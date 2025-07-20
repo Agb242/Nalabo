@@ -200,15 +200,18 @@ export default function Home() {
             </Badge>
 
             <h1 className="text-5xl md:text-7xl font-bold text-nalabo-slate mb-6 leading-tight">
-              Master 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nalabo-orange via-nalabo-blue to-nalabo-emerald animate-tech-glow animate-gradient-shift inline-block min-w-[1ch]">
-                &nbsp;Tech&nbsp;
+              <span className="inline-block animate-fade-in-up opacity-0 [animation-delay:0ms] [animation-fill-mode:forwards]">Master</span>{' '}
+              <span className="inline-block animate-fade-in-up opacity-0 [animation-delay:200ms] [animation-fill-mode:forwards] text-transparent bg-clip-text bg-gradient-to-r from-nalabo-orange via-orange-500 to-orange-600 font-extrabold animate-pulse">
+                Tech
+              </span>{' '}
+              <span className="inline-block animate-fade-in-up opacity-0 [animation-delay:400ms] [animation-fill-mode:forwards]">Through</span>{' '}
+              <span className="inline-block animate-fade-in-up opacity-0 [animation-delay:600ms] [animation-fill-mode:forwards] text-transparent bg-clip-text bg-gradient-to-r from-nalabo-blue via-blue-500 to-blue-600 font-extrabold">
+                Practice
               </span>
-              Through Practice
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-              {t('hero.subtitle')}
+              {t('hero.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
