@@ -19,24 +19,155 @@ const requireSuperAdmin = (req: any, res: any, next: any) => {
   next();
 };
 
-// Middleware pour l'audit des actions
-const auditAction = async (req: any, action: string, resource: string, resourceId?: string) => {
+// Middleware pour permissions spécifiques avec audit
+const requireSpecificPermission = (permission: string, riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'medium') => {
+  return async (req: any, res: any, next: any) => {
+    if (!req.session.userId || req.session.userRole !== 'super_admin') {
+      return res.status(403).json({ error: 'Super Admin requis' });
+    }
+
+    try {
+      // Audit de la tentative d'accès
+      await auditAction(req, 'permission_check', permission, undefined, {
+        riskLevel,
+        permission,
+        endpoint: req.originalUrl,
+        method: req.method
+      });
+
+      // Pour les actions critiques, ajouter des vérifications supplémentaires
+      if (riskLevel === 'critical') {
+        const lastCriticalAction = await storage.getLastCriticalAction(req.session.userId);
+        const timeSinceLastAction = lastCriticalAction ? 
+          Date.now() - new Date(lastCriticalAction.timestamp).getTime() : Infinity;
+        
+        // Limite d'actions critiques : max 1 par minute
+        if (timeSinceLastAction < 60000) {
+          await auditAction(req, 'critical_action_blocked', permission, undefined, {
+            reason: 'Too many critical actions',
+            lastActionTime: lastCriticalAction.timestamp,
+            rateLimited: true
+          });
+          return res.status(429).json({ 
+            error: 'Trop d\'actions critiques. Attendez 1 minute.',
+            riskLevel: 'critical',
+            nextAllowedAt: new Date(new Date(lastCriticalAction.timestamp).getTime() + 60000)
+          });
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error('Permission verification error:', error);
+      res.status(500).json({ error: 'Erreur de vérification des permissions' });
+    }
+  };
+};
+
+// Middleware pour l'audit des actions (conformité RGPD)
+const auditAction = async (
+  req: any, 
+  action: string, 
+  resource: string, 
+  resourceId?: string, 
+  additionalDetails?: any
+) => {
   try {
-    await storage.createInfrastructureAuditLog({
+    const auditEntry = {
       userId: req.session.userId,
       action,
       resource,
       resourceId,
-      details: { 
-        method: req.method, 
-        url: req.originalUrl, 
-        body: req.body 
+      details: {
+        // Informations techniques
+        method: req.method,
+        url: req.originalUrl,
+        userAgent: req.headers['user-agent'],
+        
+        // Données de la requête (filtrées pour sécurité)
+        bodyFingerprint: req.body ? Object.keys(req.body).sort().join(',') : null,
+        
+        // Informations de session
+        sessionId: req.sessionID,
+        sessionStart: req.session.createdAt,
+        
+        // Géolocalisation (si disponible)
+        country: req.headers['cf-ipcountry'] || null,
+        
+        // Détails supplémentaires
+        ...additionalDetails,
+        
+        // Conformité RGPD
+        legalBasis: determineLegalBasis(action, resource),
+        dataCategories: determineDataCategories(action, resource),
+        retention: determineRetentionPeriod(action, resource)
       },
       ipAddress: req.ip,
-    });
+      timestamp: new Date().toISOString(),
+    };
+
+    await storage.createInfrastructureAuditLog(auditEntry);
+
+    // Alertes automatiques pour actions critiques
+    if (additionalDetails?.riskLevel === 'critical') {
+      await sendCriticalActionAlert(auditEntry);
+    }
+
   } catch (error) {
     console.error('Audit logging failed:', error);
+    // En cas d'échec audit, bloquer l'action pour sécurité
+    throw new Error('Audit obligatoire - Action bloquée pour sécurité');
   }
+};
+
+// Déterminer la base légale RGPD
+const determineLegalBasis = (action: string, resource: string): string => {
+  const gdprBasis = {
+    'user_management': 'legitimate_interest',
+    'data_export': 'legal_obligation',
+    'data_deletion': 'legal_obligation',
+    'infrastructure': 'legitimate_interest',
+    'billing': 'contract_performance',
+    'security': 'legitimate_interest'
+  };
+  return gdprBasis[resource] || 'legitimate_interest';
+};
+
+// Déterminer les catégories de données
+const determineDataCategories = (action: string, resource: string): string[] => {
+  const categories = {
+    'user': ['identity', 'contact'],
+    'workshop': ['usage', 'behavioral'],
+    'billing': ['financial', 'identity'],
+    'infrastructure': ['technical', 'logs']
+  };
+  return categories[resource] || ['technical'];
+};
+
+// Déterminer la période de rétention
+const determineRetentionPeriod = (action: string, resource: string): string => {
+  const retention = {
+    'user_management': '3_years',
+    'financial': '10_years',
+    'security': '1_year',
+    'infrastructure': '6_months'
+  };
+  return retention[resource] || '1_year';
+};
+
+// Alerte pour actions critiques
+const sendCriticalActionAlert = async (auditEntry: any) => {
+  // Log spécial pour actions critiques
+  console.error('🚨 CRITICAL ACTION PERFORMED:', {
+    user: auditEntry.userId,
+    action: auditEntry.action,
+    resource: auditEntry.resource,
+    timestamp: auditEntry.timestamp,
+    ip: auditEntry.ipAddress
+  });
+  
+  // TODO: Envoyer notification email/Slack aux autres super admins
+  // TODO: Intégration système de monitoring (DataDog, NewRelic, etc.)
 };
 
 // Infrastructure Kubernetes Routes

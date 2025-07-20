@@ -1,4 +1,3 @@
-
 # Documentation Nalabo
 
 Nalabo est une plateforme française cloud-native pour l'apprentissage technologique par la pratique.
@@ -41,6 +40,25 @@ pnpm dev
 - Workflow d'ateliers end-to-end
 - Infrastructure Kubernetes stable
 - Marketplace d'ateliers
+
+## 🔐 Sécurité
+
+- **Authentification** : Sessions sécurisées avec bcrypt
+- **Isolation** : Données utilisateur strictement séparées  
+- **Permissions** : Contrôle d'accès basé sur les rôles
+- **Audit** : Logs complets des actions administratives
+- **Conformité RGPD** : Protection données personnelles
+- **Super Admin** : Droits étendus avec responsabilités légales
+
+### Super Administrateur
+Le Super Admin Nalabo dispose des **droits maximaux** avec des **responsabilités critiques** :
+- 🏗️ **Infrastructure** : Gestion complète clusters Kubernetes
+- 👥 **Utilisateurs** : Conformité RGPD, export/suppression données
+- 💰 **Facturation** : Gestion abonnements et remboursements  
+- 🔍 **Audit** : Accès logs complets et monitoring sécurité
+- ⚖️ **Légal** : Traitement demandes autorités, conformité réglementaire
+
+📋 **Documentation détaillée** : [Super Admin Permissions](./SUPER_ADMIN_PERMISSIONS.md)
 
 ## 🤝 Contribution
 

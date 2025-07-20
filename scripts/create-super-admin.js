@@ -17,24 +17,77 @@ async function createSuperAdmin() {
     // Hash du mot de passe
     const hashedPassword = await bcrypt.hash('admin123', 12);
 
-    // Données du super admin
+    // Données du super admin avec TOUTES les permissions
     const superAdminData = {
       username: 'superadmin',
       email: 'admin@nalabo.com',
       password: hashedPassword,
+      firstName: 'Super',
+      lastName: 'Administrateur',
       role: 'super_admin',
       subscription: 'enterprise',
       permissions: {
-        infrastructure: true,
-        userManagement: true,
-        communityManagement: true,
-        auditAccess: true,
-        systemSettings: true,
-        billingManagement: true
+        // Gestion Infrastructure complète
+        infrastructure: {
+          view: true,
+          create: true,
+          update: true,
+          delete: true,
+          monitor: true,
+          deploy: true
+        },
+        // Gestion Ateliers complète
+        workshops: {
+          create: true,
+          publish: true,
+          moderate: true,
+          delete: true,
+          featured: true,
+          analytics: true
+        },
+        // Gestion Utilisateurs (conformité RGPD)
+        users: {
+          view: true,
+          viewPersonalData: true,
+          manage: true,
+          suspend: true,
+          delete: true,
+          exportData: true,
+          anonymize: true
+        },
+        // Gestion Communautés
+        communities: {
+          view: true,
+          create: true,
+          manage: true,
+          billing: true,
+          suspend: true
+        },
+        // Gestion Facturation
+        billing: {
+          view: true,
+          manage: true,
+          refund: true,
+          analytics: true
+        },
+        // Administration Système
+        system: {
+          auditLogs: true,
+          backups: true,
+          maintenance: true,
+          settings: true,
+          security: true,
+          compliance: true
+        },
+        // Droits légaux et conformité
+        legal: {
+          dataProcessing: true,
+          gdprRequests: true,
+          legalNotices: true,
+          termsOfService: true
+        }
       },
-      title: 'Super Administrateur',
       points: 10000,
-      bio: 'Administrateur système principal de la plateforme Nalabo'
     };
 
     // Vérifier si le super admin existe déjà

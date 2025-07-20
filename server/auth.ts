@@ -35,6 +35,44 @@ export const requireSuperAdmin = (req: Request, res: Response, next: NextFunctio
   next();
 };
 
+// Middleware pour vérifier permissions spécifiques
+export const requirePermission = (permission: string) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session?.userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Super admin a toutes les permissions
+      if (user.role === 'super_admin') {
+        return next();
+      }
+
+      // Vérifier permission spécifique dans user.permissions
+      const permissions = user.permissions as any || {};
+      const [category, action] = permission.split('.');
+      
+      if (!permissions[category]?.[action]) {
+        return res.status(403).json({ 
+          error: 'Insufficient permissions',
+          required: permission,
+          userRole: user.role
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Permission check error:', error);
+      res.status(500).json({ error: 'Permission verification failed' });
+    }
+  };
+};
+
 // Hash password
 export async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, SALT_ROUNDS);

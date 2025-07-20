@@ -448,26 +448,72 @@ export const WorkshopStepSchema = z.object({
 
 export type WorkshopStep = z.infer<typeof WorkshopStepSchema>;
 
-// Permissions schema for role-based access
+// Permissions schema for role-based access conformément RGPD et réglementations
 export const PermissionsSchema = z.object({
+  // Gestion Infrastructure (Cluster K8s, vCluster, monitoring)
   infrastructure: z.object({
-    view: z.boolean().default(false),
-    create: z.boolean().default(false),
-    update: z.boolean().default(false),
-    delete: z.boolean().default(false),
+    view: z.boolean().default(false),           // Voir clusters et métriques
+    create: z.boolean().default(false),         // Ajouter nouveaux clusters
+    update: z.boolean().default(false),         // Modifier configuration clusters
+    delete: z.boolean().default(false),         // Supprimer clusters (avec safeguards)
+    monitor: z.boolean().default(false),        // Accès monitoring avancé
+    deploy: z.boolean().default(false),         // Déployer sur infrastructure
   }).default({}),
+  
+  // Gestion Ateliers (contenu, modération, publication)
   workshops: z.object({
-    create: z.boolean().default(true),
-    publish: z.boolean().default(false),
-    moderate: z.boolean().default(false),
+    create: z.boolean().default(true),          // Créer ateliers (tous utilisateurs)
+    publish: z.boolean().default(false),        // Publier publiquement
+    moderate: z.boolean().default(false),       // Modérer contenu communauté
+    delete: z.boolean().default(false),         // Supprimer ateliers autres users
+    featured: z.boolean().default(false),       // Marquer comme "featured"
+    analytics: z.boolean().default(false),      // Voir analytics détaillées
   }).default({}),
+  
+  // Gestion Utilisateurs (conformité RGPD)
   users: z.object({
-    view: z.boolean().default(false),
-    manage: z.boolean().default(false),
+    view: z.boolean().default(false),           // Voir liste utilisateurs
+    viewPersonalData: z.boolean().default(false), // Accès données personnelles (RGPD)
+    manage: z.boolean().default(false),         // Modifier profils utilisateurs
+    suspend: z.boolean().default(false),        // Suspendre/bannir utilisateurs
+    delete: z.boolean().default(false),         // Supprimer comptes (avec logs)
+    exportData: z.boolean().default(false),     // Export données (droit RGPD)
+    anonymize: z.boolean().default(false),      // Anonymiser données (RGPD)
   }).default({}),
+  
+  // Gestion Communautés (organisations, abonnements)
+  communities: z.object({
+    view: z.boolean().default(false),           // Voir toutes communautés
+    create: z.boolean().default(false),         // Créer communautés
+    manage: z.boolean().default(false),         // Gérer communautés existantes
+    billing: z.boolean().default(false),        // Gérer facturation communautés
+    suspend: z.boolean().default(false),        // Suspendre communautés
+  }).default({}),
+  
+  // Gestion Facturation et Abonnements
   billing: z.object({
-    view: z.boolean().default(false),
-    manage: z.boolean().default(false),
+    view: z.boolean().default(false),           // Voir données financières
+    manage: z.boolean().default(false),         // Modifier plans/prix
+    refund: z.boolean().default(false),         // Effectuer remboursements
+    analytics: z.boolean().default(false),      // Analytics financières
+  }).default({}),
+  
+  // Administration Système (logs, audit, sécurité)
+  system: z.object({
+    auditLogs: z.boolean().default(false),      // Accès logs d'audit
+    backups: z.boolean().default(false),        // Gestion sauvegardes
+    maintenance: z.boolean().default(false),    // Mode maintenance
+    settings: z.boolean().default(false),       // Paramètres globaux
+    security: z.boolean().default(false),       // Paramètres sécurité
+    compliance: z.boolean().default(false),     // Outils conformité RGPD
+  }).default({}),
+  
+  // Droits légaux et conformité
+  legal: z.object({
+    dataProcessing: z.boolean().default(false), // Traitement données personnelles
+    gdprRequests: z.boolean().default(false),   // Traiter demandes RGPD
+    legalNotices: z.boolean().default(false),   // Modifier mentions légales
+    termsOfService: z.boolean().default(false), // Modifier CGU/CGV
   }).default({}),
 });
 
