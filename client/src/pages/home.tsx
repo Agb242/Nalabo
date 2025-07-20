@@ -282,12 +282,17 @@ export default function Home() {
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                     </div>
                     <span className="text-sm font-semibold">Nalabo</span>
-                    <Badge variant="secondary" className="text-xs">Running</Badge>
+                    <Badge variant="secondary" className="text-xs bg-green-500 text-white">
+                      <div className="w-2 h-2 bg-green-300 rounded-full mr-1 animate-pulse"></div>
+                      {t('workshops.workshopRunning')}
+                    </Badge>
                   </div>
                   <div className="flex items-center space-x-2 text-xs">
-                    <span>Preview</span>
-                    <span>Console</span>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1">Deploy</Button>
+                    <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white text-xs px-2 py-1">Preview</Button>
+                    <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white text-xs px-2 py-1">Console</Button>
+                    <Button size="sm" className="bg-nalabo-orange hover:bg-nalabo-orange/90 text-xs px-3 py-1">
+                      Deploy to K8s
+                    </Button>
                   </div>
                 </div>
 
@@ -295,9 +300,12 @@ export default function Home() {
                 <div className="flex h-64">
                   {/* Left Sidebar - File Explorer */}
                   <div className="w-48 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-3">
-                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Files</div>
+                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 flex items-center">
+                      <Server className="w-3 h-3 mr-1" />
+                      Workshop Files
+                    </div>
                     <div className="space-y-1 text-xs">
-                      <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center space-x-2 text-blue-600 bg-blue-50 px-2 py-1 rounded">
                         <Container className="w-3 h-3" />
                         <span>Dockerfile</span>
                       </div>
@@ -305,9 +313,14 @@ export default function Home() {
                         <Code className="w-3 h-3" />
                         <span>app.py</span>
                       </div>
-                      <div className="flex items-center space-x-2 text-blue-600">
+                      <div className="flex items-center space-x-2 text-nalabo-orange">
                         <Server className="w-3 h-3" />
                         <span>k8s-deployment.yaml</span>
+                        <Badge variant="outline" className="text-xs">Active</Badge>
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-500">
+                        <Code className="w-3 h-3" />
+                        <span>workshop-config.json</span>
                       </div>
                     </div>
                   </div>
@@ -316,8 +329,13 @@ export default function Home() {
                   <div className="flex-1 flex flex-col">
                     {/* Tab Bar */}
                     <div className="flex bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                      <div className="px-4 py-2 bg-white dark:bg-gray-800 text-sm font-medium border-r border-gray-200 dark:border-gray-600">
+                      <div className="px-4 py-2 bg-white dark:bg-gray-800 text-sm font-medium border-r border-gray-200 dark:border-gray-600 flex items-center">
+                        <Container className="w-4 h-4 mr-2 text-nalabo-blue" />
                         {t('workshops.dockerFundamentals')}
+                        <div className="w-2 h-2 bg-green-400 rounded-full ml-2 animate-pulse"></div>
+                      </div>
+                      <div className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 cursor-pointer border-r border-gray-200">
+                        Kubernetes Deploy
                       </div>
                     </div>
 
