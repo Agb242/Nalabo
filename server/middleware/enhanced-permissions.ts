@@ -120,10 +120,10 @@ export function requirePermission(permission: Permission) {
     if (req.params.workshopId) {
       // Récupérer les infos du workshop pour obtenir l'owner
       try {
-        const workshop = await storage.getWorkshopById(parseInt(req.params.workshopId));
+        const workshop = await storage.getWorkshop(parseInt(req.params.workshopId));
         if (workshop) {
           resourceOwnerId = workshop.creatorId;
-          resourceCommunityId = workshop.communityId;
+          resourceCommunityId = workshop.communityId ?? undefined;
         }
       } catch (error) {
         console.error('Error fetching workshop for permission check:', error);

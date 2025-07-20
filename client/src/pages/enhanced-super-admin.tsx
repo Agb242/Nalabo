@@ -81,28 +81,25 @@ export default function EnhancedSuperAdmin() {
   const [selectedUser, setSelectedUser] = useState<SystemUser | null>(null);
 
   // Fetch system stats
-  const { data: systemStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/super-admin/stats'],
-    queryFn: () => apiRequest('/api/super-admin/stats'),
+  const { data: systemStats, isLoading: statsLoading } = useQuery<SystemStats>({
+    queryKey: ['/api', 'super-admin', 'stats'],
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
   // Fetch all users
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ['/api/super-admin/users'],
-    queryFn: () => apiRequest('/api/super-admin/users')
+  const { data: users, isLoading: usersLoading } = useQuery<SystemUser[]>({
+    queryKey: ['/api', 'super-admin', 'users']
   });
 
   // Fetch all communities
-  const { data: communities, isLoading: communitiesLoading } = useQuery({
-    queryKey: ['/api/super-admin/communities'],
-    queryFn: () => apiRequest('/api/super-admin/communities')
+  const { data: communities, isLoading: communitiesLoading } = useQuery<SystemCommunity[]>({
+    queryKey: ['/api', 'super-admin', 'communities']
   });
 
   // Update user role mutation
   const updateUserRoleMutation = useMutation({
     mutationFn: (data: { userId: number; role: string; communityId?: number }) =>
-      apiRequest('/api/super-admin/users/role', { method: 'PATCH', body: data }),
+      apiRequest('PATCH', '/api/super-admin/users/role', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/users'] });
       toast({
@@ -122,7 +119,7 @@ export default function EnhancedSuperAdmin() {
   // Suspend/activate user mutation
   const toggleUserStatusMutation = useMutation({
     mutationFn: (data: { userId: number; status: 'active' | 'suspended' }) =>
-      apiRequest('/api/super-admin/users/status', { method: 'PATCH', body: data }),
+      apiRequest('PATCH', '/api/super-admin/users/status', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/users'] });
       toast({
