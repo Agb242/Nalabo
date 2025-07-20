@@ -5,9 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { 
   Play, 
-  Zap, 
   Shield, 
-  Globe, 
+  Zap, 
   Users, 
   Award,
   ChevronRight,
@@ -29,7 +28,11 @@ import {
   Phone,
   Mail,
   FolderOpen,
-  Settings
+  Settings,
+  Terminal,
+  FileText,
+  Package,
+  GitBranch
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-context';
 import { useLanguage } from '@/contexts/language-context';
