@@ -166,14 +166,48 @@ export default function SuperAdminDashboard() {
     );
   };
 
+  const [kubeconfigValidation, setKubeconfigValidation] = useState<{
+    valid: boolean;
+    info?: any;
+    error?: string;
+  }>({ valid: false });
+
+  const validateKubeconfig = async (kubeconfig: string) => {
+    if (!kubeconfig.trim()) {
+      setKubeconfigValidation({ valid: false });
+      return;
+    }
+
+    try {
+      const response = await apiRequest('POST', '/api/super-admin/infrastructure/validate-kubeconfig', {
+        kubeconfig
+      });
+      
+      setKubeconfigValidation({
+        valid: true,
+        info: response.clusterInfo
+      });
+    } catch (error: any) {
+      setKubeconfigValidation({
+        valid: false,
+        error: error.message || 'Kubeconfig invalide'
+      });
+    }
+  };
+
   const handleAddCluster = (formData: FormData) => {
     const clusterData = {
       name: formData.get('name'),
       description: formData.get('description'),
       kubeconfig: formData.get('kubeconfig'),
-      endpoint: formData.get('endpoint'),
       provider: formData.get('provider'),
       vclusterEnabled: formData.get('vclusterEnabled') === 'on',
+      resourceLimits: {
+        maxVClusters: parseInt(formData.get('maxVClusters') as string) || 10,
+        maxCpuPerVCluster: formData.get('maxCpu') || '2000m',
+        maxMemoryPerVCluster: formData.get('maxMemory') || '4Gi',
+        maxStoragePerVCluster: formData.get('maxStorage') || '20Gi',
+      }
     };
 
     addClusterMutation.mutate(clusterData);
@@ -264,53 +298,214 @@ export default function SuperAdminDashboard() {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
                   handleAddCluster(formData);
-                }} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nom du cluster</Label>
-                      <Input id="name" name="name" required />
+                }} className="space-y-6">
+                  {/* Informations de base */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Informations du Cluster</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Nom du cluster</Label>
+                        <Input 
+                          id="name" 
+                          name="name" 
+                          placeholder="prod-cluster-1"
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="provider">Fournisseur</Label>
+                        <Select name="provider" required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="aws">AWS EKS</SelectItem>
+                            <SelectItem value="gcp">Google GKE</SelectItem>
+                            <SelectItem value="azure">Azure AKS</SelectItem>
+                            <SelectItem value="digitalocean">DigitalOcean DOKS</SelectItem>
+                            <SelectItem value="linode">Linode LKE</SelectItem>
+                            <SelectItem value="on-premise">On-Premise</SelectItem>
+                            <SelectItem value="minikube">Minikube (Dev)</SelectItem>
+                            <SelectItem value="k3s">K3s</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="provider">Fournisseur</Label>
-                      <Select name="provider" required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="aws">AWS EKS</SelectItem>
-                          <SelectItem value="gcp">Google GKE</SelectItem>
-                          <SelectItem value="azure">Azure AKS</SelectItem>
-                          <SelectItem value="on-premise">On-Premise</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="description">Description</Label>
+                      <Input 
+                        id="description" 
+                        name="description" 
+                        placeholder="Cluster de production pour ateliers Kubernetes"
+                      />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endpoint">Endpoint API</Label>
-                    <Input id="endpoint" name="endpoint" type="url" required />
+
+                  {/* Configuration Kubeconfig */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Configuration Kubernetes</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="kubeconfig" className="flex items-center gap-2">
+                        Kubeconfig
+                        <span className="text-sm text-muted-foreground">(YAML complet)</span>
+                      </Label>
+                      <Textarea 
+                        id="kubeconfig" 
+                        name="kubeconfig" 
+                        rows={12}
+                        placeholder={`apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority-data: LS0t...
+    server: https://your-cluster.example.com
+  name: your-cluster
+contexts:
+- context:
+    cluster: your-cluster
+    user: your-user
+  name: your-context
+current-context: your-context
+users:
+- name: your-user
+  user:
+    client-certificate-data: LS0t...
+    client-key-data: LS0t...`}
+                        required
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value.length > 100) { // Éviter trop de requêtes
+                            validateKubeconfig(value);
+                          }
+                        }}
+                        className={kubeconfigValidation.valid === false && kubeconfigValidation.error ? 
+                          'border-red-500' : kubeconfigValidation.valid ? 'border-green-500' : ''}
+                      />
+                      
+                      {/* Validation feedback */}
+                      {kubeconfigValidation.error && (
+                        <div className="flex items-center gap-2 text-sm text-red-600">
+                          <XCircle className="h-4 w-4" />
+                          {kubeconfigValidation.error}
+                        </div>
+                      )}
+                      
+                      {kubeconfigValidation.valid && kubeconfigValidation.info && (
+                        <div className="bg-green-50 p-3 rounded-md">
+                          <div className="flex items-center gap-2 text-sm text-green-800">
+                            <CheckCircle className="h-4 w-4" />
+                            Kubeconfig valide
+                          </div>
+                          <div className="mt-2 space-y-1 text-xs text-green-700">
+                            <div><strong>Cluster:</strong> {kubeconfigValidation.info.name}</div>
+                            <div><strong>Endpoint:</strong> {kubeconfigValidation.info.endpoint}</div>
+                            <div><strong>Contexte:</strong> {kubeconfigValidation.info.context}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Input id="description" name="description" />
+
+                  {/* Limites de ressources */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Limites de Ressources</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="maxVClusters">Max vClusters simultanés</Label>
+                        <Input 
+                          id="maxVClusters" 
+                          name="maxVClusters" 
+                          type="number"
+                          defaultValue="10"
+                          min="1"
+                          max="100"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="maxCpu">CPU max par vCluster</Label>
+                        <Select name="maxCpu" defaultValue="2000m">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="500m">0.5 CPU</SelectItem>
+                            <SelectItem value="1000m">1 CPU</SelectItem>
+                            <SelectItem value="2000m">2 CPU</SelectItem>
+                            <SelectItem value="4000m">4 CPU</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="maxMemory">Mémoire max par vCluster</Label>
+                        <Select name="maxMemory" defaultValue="4Gi">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1Gi">1 Gi</SelectItem>
+                            <SelectItem value="2Gi">2 Gi</SelectItem>
+                            <SelectItem value="4Gi">4 Gi</SelectItem>
+                            <SelectItem value="8Gi">8 Gi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="maxStorage">Stockage max par vCluster</Label>
+                        <Select name="maxStorage" defaultValue="20Gi">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5Gi">5 Gi</SelectItem>
+                            <SelectItem value="10Gi">10 Gi</SelectItem>
+                            <SelectItem value="20Gi">20 Gi</SelectItem>
+                            <SelectItem value="50Gi">50 Gi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="kubeconfig">Kubeconfig</Label>
-                    <Textarea 
-                      id="kubeconfig" 
-                      name="kubeconfig" 
-                      rows={8}
-                      placeholder="Collez votre kubeconfig ici..."
-                      required 
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="vclusterEnabled"
-                      name="vclusterEnabled"
-                      defaultChecked
-                    />
-                    <Label htmlFor="vclusterEnabled">Activer vCluster</Label>
+
+                  {/* Options avancées */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Options</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="vclusterEnabled"
+                          name="vclusterEnabled"
+                          defaultChecked
+                        />
+                        <Label htmlFor="vclusterEnabled" className="text-sm">
+                          Activer support vCluster (recommandé)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="autoCleanup"
+                          name="autoCleanup"
+                          defaultChecked
+                        />
+                        <Label htmlFor="autoCleanup" className="text-sm">
+                          Nettoyage automatique des vClusters expirés
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="monitoringEnabled"
+                          name="monitoringEnabled"
+                          defaultChecked
+                        />
+                        <Label htmlFor="monitoringEnabled" className="text-sm">
+                          Activer monitoring avancé
+                        </Label>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex justify-end space-x-2">
                     <Button type="button" variant="outline" onClick={() => setShowAddClusterDialog(false)}>
@@ -355,26 +550,70 @@ export default function SuperAdminDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">vCluster:</span>
-                      <span className="ml-2">
-                        {cluster.vclusterEnabled ? (
-                          <CheckCircle className="inline h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="inline h-4 w-4 text-red-600" />
-                        )}
-                      </span>
+                  <div className="space-y-4">
+                    {/* Informations principales */}
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">vCluster:</span>
+                        <span className="ml-2">
+                          {cluster.vclusterEnabled ? (
+                            <CheckCircle className="inline h-4 w-4 text-green-600" />
+                          ) : (
+                            <XCircle className="inline h-4 w-4 text-red-600" />
+                          )}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">vClusters actifs:</span>
+                        <span className="ml-2 font-medium">
+                          {vclusters.filter(vc => vc.clusterId === cluster.id && vc.status === 'ready').length}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Version K8s:</span>
+                        <span className="ml-2">{cluster.metadata?.clusterInfo?.version || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Nœuds:</span>
+                        <span className="ml-2">{cluster.metadata?.clusterInfo?.nodeCount || '0'}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">vClusters actifs:</span>
-                      <span className="ml-2 font-medium">
-                        {vclusters.filter(vc => vc.clusterId === cluster.id && vc.status === 'ready').length}
+
+                    {/* Limites de ressources */}
+                    {cluster.resourceLimits && (
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <div className="text-xs font-medium text-gray-700 mb-2">Limites par vCluster</div>
+                        <div className="grid grid-cols-3 gap-4 text-xs">
+                          <div>
+                            <span className="text-gray-600">CPU:</span>
+                            <span className="ml-1 font-mono">{cluster.resourceLimits.maxCpuPerVCluster}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">RAM:</span>
+                            <span className="ml-1 font-mono">{cluster.resourceLimits.maxMemoryPerVCluster}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Storage:</span>
+                            <span className="ml-1 font-mono">{cluster.resourceLimits.maxStoragePerVCluster}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actions rapides */}
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Button variant="outline" size="sm">
+                        <Activity className="h-4 w-4 mr-1" />
+                        Tester Connexion
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <BarChart3 className="h-4 w-4 mr-1" />
+                        Métriques
+                      </Button>
+                      <div className="flex-1"></div>
+                      <span className="text-xs text-muted-foreground">
+                        Ajouté le {new Date(cluster.createdAt).toLocaleDateString()}
                       </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Créé:</span>
-                      <span className="ml-2">{new Date(cluster.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </CardContent>

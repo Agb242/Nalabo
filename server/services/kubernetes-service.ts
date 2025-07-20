@@ -297,6 +297,38 @@ data:
       return {};
     }
   }
+
+  /**
+   * Get current context from kubeconfig
+   */
+  getCurrentContext(kubeconfig: string): string | undefined {
+    try {
+      const config = yaml.load(kubeconfig) as any;
+      return config['current-context'];
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  /**
+   * Execute kubectl command with specific kubeconfig
+   */
+  async executeKubectl(args: string[], kubeconfig: string): Promise<{ stdout: string; stderr: string }> {
+    // Écrire temporairement le kubeconfig
+    const tempKubeconfigPath = `/tmp/kubeconfig-${Date.now()}.yaml`;
+    await fs.writeFile(tempKubeconfigPath, kubeconfig);
+
+    try {
+      const { stdout, stderr } = await execAsync(
+        `kubectl --kubeconfig=${tempKubeconfigPath} ${args.join(' ')}`,
+        { timeout: 30000 }
+      );
+      return { stdout, stderr };
+    } finally {
+      // Nettoyer le fichier temporaire
+      await fs.unlink(tempKubeconfigPath).catch(() => {});
+    }
+  }
 }
 
 export default KubernetesService;

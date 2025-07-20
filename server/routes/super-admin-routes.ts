@@ -57,6 +57,70 @@ router.get('/infrastructure', requireAuth, requireSuperAdmin, async (req, res) =
 });
 
 /**
+ * POST /api/super-admin/infrastructure/validate-kubeconfig
+ * Valide un kubeconfig et retourne les informations du cluster
+ */
+router.post('/infrastructure/validate-kubeconfig', requireAuth, requireSuperAdmin, async (req, res) => {
+  try {
+    const { kubeconfig } = req.body;
+    
+    if (!kubeconfig) {
+      return res.status(400).json({ error: 'Kubeconfig requis' });
+    }
+
+    // Valider le format du kubeconfig
+    if (!KubernetesService.validateKubeconfig(kubeconfig)) {
+      return res.status(400).json({ error: 'Format kubeconfig invalide' });
+    }
+
+    // Extraire les informations
+    const clusterInfo = KubernetesService.extractClusterInfo(kubeconfig);
+    
+    // Tester la connexion
+    const kubernetesService = new KubernetesService();
+    const connectionTest = await kubernetesService.testConnection(kubeconfig);
+    
+    if (!connectionTest) {
+      return res.status(400).json({ error: 'Impossible de se connecter au cluster avec ce kubeconfig' });
+    }
+
+    // Obtenir des infos détaillées du cluster
+    try {
+      const { stdout: versionOutput } = await kubernetesService.executeKubectl(['version', '--output=json'], kubeconfig);
+      const versionInfo = JSON.parse(versionOutput);
+      
+      const { stdout: nodeOutput } = await kubernetesService.executeKubectl(['get', 'nodes', '--output=json'], kubeconfig);
+      const nodesInfo = JSON.parse(nodeOutput);
+      
+      res.json({
+        valid: true,
+        clusterInfo: {
+          ...clusterInfo,
+          context: kubernetesService.getCurrentContext(kubeconfig),
+          version: versionInfo.serverVersion?.gitVersion || 'Unknown',
+          nodeCount: nodesInfo.items?.length || 0,
+          nodes: nodesInfo.items?.map((node: any) => ({
+            name: node.metadata.name,
+            version: node.status.nodeInfo.kubeletVersion,
+            ready: node.status.conditions?.find((c: any) => c.type === 'Ready')?.status === 'True'
+          })) || []
+        }
+      });
+    } catch (detailError) {
+      // Si on ne peut pas obtenir les détails, retourner quand même les infos de base
+      res.json({
+        valid: true,
+        clusterInfo
+      });
+    }
+
+  } catch (error) {
+    console.error('Error validating kubeconfig:', error);
+    res.status(500).json({ error: 'Erreur lors de la validation du kubeconfig' });
+  }
+});
+
+/**
  * POST /api/super-admin/infrastructure
  * Ajoute un nouveau cluster Kubernetes
  */
@@ -80,16 +144,35 @@ router.post('/infrastructure', requireAuth, requireSuperAdmin, async (req, res) 
       return res.status(400).json({ error: 'Impossible de se connecter au cluster' });
     }
 
-    // Créer le cluster dans la base de données
+    // Vérifier si le cluster n'existe pas déjà
+    const existingCluster = await storage.findClusterByEndpoint(clusterInfo.endpoint);
+    if (existingCluster) {
+      return res.status(400).json({ 
+        error: 'Un cluster avec cet endpoint existe déjà',
+        existingCluster: existingCluster.name
+      });
+    }
+
+    // Créer le cluster dans la base de données avec toutes les informations
     const cluster = await storage.createKubernetesCluster({
       ...clusterData,
-      endpoint: clusterInfo.endpoint || clusterData.endpoint,
+      endpoint: clusterInfo.endpoint || `https://${clusterData.name}.local`,
       managedById: req.session.userId,
+      status: 'active',
+      metadata: {
+        clusterInfo,
+        addedAt: new Date().toISOString(),
+        addedBy: req.session.username
+      }
     });
 
+    // Créer une entrée d'audit détaillée
     await auditAction(req, 'create', 'cluster', cluster.id.toString());
     
-    res.status(201).json({ cluster });
+    res.status(201).json({ 
+      cluster,
+      message: 'Cluster ajouté avec succès et connexion validée'
+    });
   } catch (error) {
     console.error('Error creating cluster:', error);
     if (error instanceof z.ZodError) {
