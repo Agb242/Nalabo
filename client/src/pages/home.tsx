@@ -30,6 +30,7 @@ import {
   Mail
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 
 const techLogos = [
   { name: 'Docker', icon: Container, color: 'text-blue-500' },
@@ -163,6 +164,7 @@ const pricingPlans = [
 export default function Home() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const navigate = (path: string) => setLocation(path);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -199,15 +201,14 @@ export default function Home() {
 
             <h1 className="text-5xl md:text-7xl font-bold text-nalabo-slate mb-6 leading-tight">
               Master 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nalabo-orange via-nalabo-blue to-nalabo-emerald animate-tech-glow animate-gradient-shift">
-                {' '}Tech{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nalabo-orange via-nalabo-blue to-nalabo-emerald animate-tech-glow animate-gradient-shift inline-block min-w-[1ch]">
+                &nbsp;Tech&nbsp;
               </span>
               Through Practice
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-              The cloud-native platform for immersive technical workshops. 
-              Train your teams on Docker, Kubernetes, AI/ML and cutting-edge technologies.
+              {t('hero.subtitle')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -216,7 +217,7 @@ export default function Home() {
                 className="bg-nalabo-orange hover:bg-nalabo-orange/90 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
                 onClick={handleGetStarted}
               >
-                Start Free Today
+                {t('hero.startFree')}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
 
@@ -227,7 +228,7 @@ export default function Home() {
                 onClick={() => navigate('/workshops')}
               >
                 <Play className="mr-2 h-5 w-5" />
-                Explore Workshops
+                {t('hero.exploreWorkshops')}
               </Button>
             </div>
           </div>
@@ -259,79 +260,97 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
               <h2 className="text-3xl font-bold text-nalabo-slate mb-4">
-                Explore Our Interactive Workshops
+                {t('workshops.title')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Dive into hands-on learning with pre-configured environments and real-world scenarios.
-                Our workshops cover everything from Docker and Kubernetes to AI/ML and cybersecurity.
+                {t('workshops.description')}
               </p>
-              <Button onClick={() => navigate('/workshops')}>See All Workshops</Button>
+              <Button onClick={() => navigate('/workshops')}>{t('workshops.seeAll')}</Button>
             </div>
             <div className="relative">
-              {/* Animated Workshop Interface Preview */}
-              <div className="bg-white rounded-lg shadow-2xl p-6 border border-gray-200 transform hover:scale-105 transition-all duration-500">
-                {/* Mock Browser Header */}
-                <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-gray-200">
-                  <div className="flex space-x-1">
-                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+              {/* Enhanced Workshop Environment Preview - Based on Screenshot */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 transform hover:scale-105 transition-all duration-500 overflow-hidden">
+                {/* Replit-style Header */}
+                <div className="bg-gray-900 text-white p-3 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex space-x-1">
+                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    </div>
+                    <span className="text-sm font-semibold">Nalabo</span>
+                    <Badge variant="secondary" className="text-xs">Running</Badge>
                   </div>
-                  <div className="flex-1 bg-gray-100 rounded px-3 py-1 text-xs text-gray-500">
-                    nalabo.co/workshop/docker-basics
+                  <div className="flex items-center space-x-2 text-xs">
+                    <span>Preview</span>
+                    <span>Console</span>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1">Deploy</Button>
                   </div>
                 </div>
 
-                {/* Workshop Content Preview */}
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-nalabo-blue rounded-lg flex items-center justify-center">
-                      <Container className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm">Docker Fundamentals</h3>
-                      <p className="text-xs text-gray-500">Interactive Container Workshop</p>
-                    </div>
-                  </div>
-
-                  {/* Code Editor Mock */}
-                  <div className="bg-gray-900 rounded-lg p-3 text-xs">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Code className="w-3 h-3 text-green-400" />
-                      <span className="text-green-400">Terminal</span>
-                    </div>
-                    <div className="text-green-400 font-mono space-y-1">
-                      <div className="animate-pulse">$ docker run -d --name workshop nginx</div>
-                      <div className="text-gray-400">Container started successfully ✓</div>
-                      <div className="animate-pulse delay-1000">$ docker ps</div>
+                {/* Main Interface */}
+                <div className="flex h-64">
+                  {/* Left Sidebar - File Explorer */}
+                  <div className="w-48 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-3">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Files</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
+                        <Container className="w-3 h-3" />
+                        <span>Dockerfile</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
+                        <Code className="w-3 h-3" />
+                        <span>app.py</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-blue-600">
+                        <Server className="w-3 h-3" />
+                        <span>k8s-deployment.yaml</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Progress Indicators */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-600">Progress</span>
-                      <span className="text-nalabo-blue font-semibold">Step 3/7</span>
+                  {/* Main Content Area */}
+                  <div className="flex-1 flex flex-col">
+                    {/* Tab Bar */}
+                    <div className="flex bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                      <div className="px-4 py-2 bg-white dark:bg-gray-800 text-sm font-medium border-r border-gray-200 dark:border-gray-600">
+                        {t('workshops.dockerFundamentals')}
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-nalabo-orange to-nalabo-blue h-2 rounded-full animate-pulse" style={{width: '43%'}}></div>
+
+                    {/* Workshop Content */}
+                    <div className="flex-1 p-4 bg-white dark:bg-gray-800">
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{t('workshops.dockerFundamentals')}</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t('workshops.interactiveContainer')}</p>
+                      </div>
+
+                      {/* Interactive Terminal */}
+                      <div className="bg-gray-900 rounded-lg p-3 text-xs font-mono">
+                        <div className="flex items-center space-x-2 mb-2 text-green-400">
+                          <Code className="w-3 h-3" />
+                          <span>{t('workshops.terminal')}</span>
+                        </div>
+                        <div className="text-green-400 space-y-1">
+                          <div className="animate-pulse">$ docker run -d --name workshop nginx</div>
+                          <div className="text-gray-400">{t('workshops.containerStarted')}</div>
+                          <div className="animate-pulse delay-1000">$ kubectl apply -f deployment.yaml</div>
+                          <div className="text-blue-400">deployment.apps/nginx-workshop created</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Tools Panel */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-blue-50 rounded p-2 text-center">
-                      <Server className="w-4 h-4 mx-auto text-blue-600 mb-1" />
-                      <span className="text-xs text-blue-600">Kubernetes</span>
-                    </div>
-                    <div className="bg-orange-50 rounded p-2 text-center">
-                      <Container className="w-4 h-4 mx-auto text-orange-600 mb-1" />
-                      <span className="text-xs text-orange-600">Docker</span>
-                    </div>
-                    <div className="bg-green-50 rounded p-2 text-center">
-                      <GitBranch className="w-4 h-4 mx-auto text-green-600 mb-1" />
-                      <span className="text-xs text-green-600">CI/CD</span>
-                    </div>
+                {/* Bottom Status Bar */}
+                <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-green-600">● Connected to Kubernetes</span>
+                    <span className="text-gray-600 dark:text-gray-400">Port 3000</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="outline" className="text-xs">{t('technologies.docker')}</Badge>
+                    <Badge variant="outline" className="text-xs">{t('technologies.kubernetes')}</Badge>
                   </div>
                 </div>
               </div>

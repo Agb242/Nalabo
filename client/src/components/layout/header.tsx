@@ -3,7 +3,9 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/components/auth/auth-context";
+import { useLanguage } from "@/contexts/language-context";
 import { AuthModal } from "@/components/auth/auth-modal";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Moon, Sun, User, LogOut, Settings, Zap } from "lucide-react";
 import {
   DropdownMenu,
@@ -18,6 +20,7 @@ export function Header() {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { user, logout, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -47,7 +50,7 @@ export function Header() {
                   Nalabo
                 </span>
                 <span className="text-xs text-gray-600 dark:text-gray-300">
-                  Plateforme cloud-native de workshops Tech
+                  {t('hero.subtitle').split('.')[0]}
                 </span>
               </div>
             </div>
@@ -61,7 +64,7 @@ export function Header() {
                   ? "text-orange-500" 
                   : "text-blue-800 dark:text-slate-300 hover:text-orange-500"
               }`}>
-                Ateliers
+                {t('nav.workshops')}
               </span>
             </Link>
             <Link href="/challenges">
@@ -70,7 +73,7 @@ export function Header() {
                   ? "text-orange-500" 
                   : "text-slate-600 dark:text-slate-300 hover:text-orange-500"
               }`}>
-                Défis
+                {t('nav.challenges')}
               </span>
             </Link>
             <Link href="/dashboard">
@@ -79,25 +82,19 @@ export function Header() {
                   ? "text-orange-500" 
                   : "text-slate-600 dark:text-slate-300 hover:text-orange-500"
               }`}>
-                Tableau de bord
+                {t('nav.dashboard')}
               </span>
             </Link>
-            <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
-              Communauté
-            </span>
-            <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
-              Certifications
-            </span>
-            <span 
-              className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer"
-              onClick={() => navigate('/community')}
-            >
-              Community
-            </span>
+            <Link href="/community">
+              <span className="text-slate-600 dark:text-slate-300 hover:text-orange-500 font-medium cursor-pointer">
+                {t('nav.community')}
+              </span>
+            </Link>
           </nav>
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="sm"
@@ -116,12 +113,12 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t('nav.profile')}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <Link href="/profile" className="flex items-center w-full">
                       <User className="mr-2 h-4 w-4" />
-                      <span>Profil</span>
+                      <span>{t('nav.profile')}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
@@ -133,7 +130,7 @@ export function Header() {
                       <DropdownMenuItem>
                         <Link href="/admin" className="flex items-center w-full">
                           <Settings className="mr-2 h-4 w-4" />
-                          <span>Administration</span>
+                          <span>{t('nav.admin')}</span>
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -141,7 +138,7 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Déconnexion</span>
+                    <span>{t('nav.logout')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -150,7 +147,7 @@ export function Header() {
                 onClick={() => setAuthModalOpen(true)}
                 className="bg-orange-500 text-white hover:bg-orange-600"
               >
-                Connexion
+                {t('nav.login')}
               </Button>
             )}
           </div>

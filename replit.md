@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### 2025-01-20 - Migration Complete & Internationalization Added ✅
+- ✅ Successfully migrated from Replit Agent to standard Replit environment
+- ✅ Set up PostgreSQL database with proper connection and schema
+- ✅ Added complete internationalization system (French/English)
+- ✅ Enhanced workshop environment preview inspired by Replit interface
+- ✅ Fixed header animation issue for "Tech" visibility
+- ✅ Added language switcher in header with flag icons
+- ✅ Updated all UI components to use translation system
+- ✅ Improved super admin Kubernetes connection management
+- ✅ Application running successfully on port 5000
+
 ### 2025-01-20 - PHASE 1 STABILISATION CRITIQUE : Isolation Utilisateur Complète ✅ TERMINÉE
 - ✅ Implémentation complète du middleware d'isolation utilisateur (user-isolation.ts)
 - ✅ Filtrage automatique des données par userId, communityId et rôle utilisateur
