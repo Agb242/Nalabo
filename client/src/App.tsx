@@ -11,6 +11,8 @@ import Home from "@/pages/home";
 import Workshops from "@/pages/workshops";
 import WorkshopMaster from "@/pages/workshop-master";
 import AdminDashboard from "@/pages/admin-dashboard";
+import SuperAdminDashboard from "@/pages/super-admin-dashboard";
+import WorkshopBuilderEnhanced from "@/pages/workshop-builder-enhanced";
 import Dashboard from "@/pages/dashboard";
 import SecureDashboard from "@/pages/secure-dashboard";
 import Challenges from "@/pages/challenges";
@@ -23,7 +25,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/workshops" component={Workshops} />
       <Route path="/workshop/:workshopId" component={WorkshopMaster} />
+      <Route path="/workshop-builder" component={WorkshopBuilderEnhanced} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/super-admin" component={SuperAdminDashboard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/secure-dashboard" component={SecureDashboard} />
       <Route path="/challenges" component={Challenges} />

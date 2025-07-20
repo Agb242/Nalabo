@@ -18,11 +18,14 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
-  role: text("role").notNull().default("user"), // user, admin, moderator
+  role: text("role").notNull().default("user"), // user, community_admin, super_admin
   avatar: text("avatar"),
   points: integer("points").default(0),
+  subscription: text("subscription").default("free"), // free, premium, enterprise
+  communityId: integer("community_id").references(() => communities.id),
+  permissions: json("permissions"), // Custom permissions for different roles
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_updatedAt").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Workshops table
@@ -31,15 +34,21 @@ export const workshops = pgTable("workshops", {
   title: text("title").notNull(),
   description: text("description"),
   creatorId: integer("creator_id").references(() => users.id),
+  communityId: integer("community_id").references(() => communities.id),
   category: text("category").notNull(), // docker, kubernetes, ai-ml, etc.
   difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced, expert
   estimatedDuration: integer("estimated_duration"), // in minutes
   status: text("status").notNull().default("draft"), // draft, published, archived
   template: text("template"), // template type used
-  steps: json("steps"), // workshop steps as JSON
-  environmentConfig: json("environment_config"), // container config
+  steps: json("steps"), // workshop steps as JSON with tools and documents
+  environmentConfig: json("environment_config"), // vCluster and K8s config
+  kubernetesTools: json("kubernetes_tools"), // kubectl, helm, kustomize, etc.
+  requiredResources: json("required_resources"), // CPU, memory, storage
+  documents: json("documents"), // PDF/MD documents attached to workshop
   tags: text("tags").array(),
   isPublic: boolean("is_public").default(true),
+  vclusterTemplate: text("vcluster_template"), // vCluster configuration template
+  isolationLevel: text("isolation_level").default("standard"), // standard, high, enterprise
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -102,7 +111,11 @@ export const communities = pgTable("communities", {
   description: text("description"),
   ownerId: integer("owner_id").references(() => users.id),
   isPrivate: boolean("is_private").default(false),
+  subscription: text("subscription").default("free"), // free, premium, enterprise
+  k8sClusterId: integer("k8s_cluster_id").references(() => kubernetesInfrastructure.id),
   settings: json("settings"),
+  permissions: json("permissions"), // What the community can do
+  resourceLimits: json("resource_limits"), // CPU, memory, storage limits
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -115,8 +128,71 @@ export const communityMemberships = pgTable("community_memberships", {
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 
+// Kubernetes Infrastructure table
+export const kubernetesInfrastructure = pgTable("kubernetes_infrastructure", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  kubeconfig: text("kubeconfig").notNull(), // Base64 encoded kubeconfig
+  endpoint: text("endpoint").notNull(),
+  region: text("region"),
+  provider: text("provider").notNull(), // aws, gcp, azure, on-premise
+  status: text("status").notNull().default("active"), // active, inactive, maintenance
+  resourceLimits: json("resource_limits"), // Overall cluster limits
+  vclusterEnabled: boolean("vcluster_enabled").default(true),
+  managedById: integer("managed_by_id").references(() => users.id), // Super admin who manages this cluster
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// vCluster instances for workshop isolation
+export const vclusterInstances = pgTable("vcluster_instances", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  workshopId: integer("workshop_id").references(() => workshops.id),
+  userId: integer("user_id").references(() => users.id),
+  clusterId: integer("cluster_id").references(() => kubernetesInfrastructure.id),
+  namespace: text("namespace").notNull(),
+  status: text("status").notNull().default("creating"), // creating, ready, running, stopped, failed
+  vclusterConfig: json("vcluster_config"), // vCluster specific configuration
+  accessConfig: json("access_config"), // Kubeconfig for user access
+  resourceUsage: json("resource_usage"), // Current resource consumption
+  expiresAt: timestamp("expires_at"), // When this vCluster will be cleaned up
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Workshop Documents table
+export const workshopDocuments = pgTable("workshop_documents", {
+  id: serial("id").primaryKey(),
+  workshopId: integer("workshop_id").references(() => workshops.id),
+  fileName: text("file_name").notNull(),
+  originalName: text("original_name").notNull(),
+  fileType: text("file_type").notNull(), // pdf, md, txt, etc.
+  fileSize: integer("file_size").notNull(), // in bytes
+  filePath: text("file_path").notNull(), // Storage path
+  stepIndex: integer("step_index"), // Which step this document belongs to (optional)
+  description: text("description"),
+  isPublic: boolean("is_public").default(false),
+  uploadedById: integer("uploaded_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Infrastructure Audit Log
+export const infrastructureAuditLog = pgTable("infrastructure_audit_log", {
+  id: serial("id").primaryKey(),
+  clusterId: integer("cluster_id").references(() => kubernetesInfrastructure.id),
+  userId: integer("user_id").references(() => users.id),
+  action: text("action").notNull(), // create, update, delete, deploy, access
+  resource: text("resource").notNull(), // cluster, vcluster, workshop, user
+  resourceId: text("resource_id"),
+  details: json("details"), // Action details
+  ipAddress: text("ip_address"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   workshops: many(workshops),
   workshopSessions: many(workshopSessions),
   challenges: many(challenges),
@@ -124,6 +200,13 @@ export const usersRelations = relations(users, ({ many }) => ({
   certifications: many(certifications),
   communities: many(communities),
   communityMemberships: many(communityMemberships),
+  managedClusters: many(kubernetesInfrastructure),
+  vclusterInstances: many(vclusterInstances),
+  uploadedDocuments: many(workshopDocuments),
+  community: one(communities, {
+    fields: [users.communityId],
+    references: [communities.id],
+  }),
 }));
 
 export const workshopsRelations = relations(workshops, ({ one, many }) => ({
@@ -131,7 +214,13 @@ export const workshopsRelations = relations(workshops, ({ one, many }) => ({
     fields: [workshops.creatorId],
     references: [users.id],
   }),
+  community: one(communities, {
+    fields: [workshops.communityId],
+    references: [communities.id],
+  }),
   sessions: many(workshopSessions),
+  vclusterInstances: many(vclusterInstances),
+  documents: many(workshopDocuments),
 }));
 
 export const workshopSessionsRelations = relations(workshopSessions, ({ one }) => ({
@@ -190,6 +279,53 @@ export const communityMembershipsRelations = relations(communityMemberships, ({ 
   }),
 }));
 
+// New relations for infrastructure tables
+export const kubernetesInfrastructureRelations = relations(kubernetesInfrastructure, ({ one, many }) => ({
+  managedBy: one(users, {
+    fields: [kubernetesInfrastructure.managedById],
+    references: [users.id],
+  }),
+  vclusterInstances: many(vclusterInstances),
+  communities: many(communities),
+}));
+
+export const vclusterInstancesRelations = relations(vclusterInstances, ({ one }) => ({
+  workshop: one(workshops, {
+    fields: [vclusterInstances.workshopId],
+    references: [workshops.id],
+  }),
+  user: one(users, {
+    fields: [vclusterInstances.userId],
+    references: [users.id],
+  }),
+  cluster: one(kubernetesInfrastructure, {
+    fields: [vclusterInstances.clusterId],
+    references: [kubernetesInfrastructure.id],
+  }),
+}));
+
+export const workshopDocumentsRelations = relations(workshopDocuments, ({ one }) => ({
+  workshop: one(workshops, {
+    fields: [workshopDocuments.workshopId],
+    references: [workshops.id],
+  }),
+  uploadedBy: one(users, {
+    fields: [workshopDocuments.uploadedById],
+    references: [users.id],
+  }),
+}));
+
+export const infrastructureAuditLogRelations = relations(infrastructureAuditLog, ({ one }) => ({
+  cluster: one(kubernetesInfrastructure, {
+    fields: [infrastructureAuditLog.clusterId],
+    references: [kubernetesInfrastructure.id],
+  }),
+  user: one(users, {
+    fields: [infrastructureAuditLog.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -235,6 +371,29 @@ export const insertCommunityMembershipSchema = createInsertSchema(communityMembe
   joinedAt: true,
 });
 
+// New insert schemas for infrastructure tables
+export const insertKubernetesInfrastructureSchema = createInsertSchema(kubernetesInfrastructure).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVclusterInstanceSchema = createInsertSchema(vclusterInstances).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWorkshopDocumentSchema = createInsertSchema(workshopDocuments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertInfrastructureAuditLogSchema = createInsertSchema(infrastructureAuditLog).omit({
+  id: true,
+  timestamp: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -252,3 +411,64 @@ export type Community = typeof communities.$inferSelect;
 export type InsertCommunity = z.infer<typeof insertCommunitySchema>;
 export type CommunityMembership = typeof communityMemberships.$inferSelect;
 export type InsertCommunityMembership = z.infer<typeof insertCommunityMembershipSchema>;
+
+// New types for infrastructure tables
+export type KubernetesInfrastructure = typeof kubernetesInfrastructure.$inferSelect;
+export type InsertKubernetesInfrastructure = z.infer<typeof insertKubernetesInfrastructureSchema>;
+export type VclusterInstance = typeof vclusterInstances.$inferSelect;
+export type InsertVclusterInstance = z.infer<typeof insertVclusterInstanceSchema>;
+export type WorkshopDocument = typeof workshopDocuments.$inferSelect;
+export type InsertWorkshopDocument = z.infer<typeof insertWorkshopDocumentSchema>;
+export type InfrastructureAuditLog = typeof infrastructureAuditLog.$inferSelect;
+export type InsertInfrastructureAuditLog = z.infer<typeof insertInfrastructureAuditLogSchema>;
+
+// Enhanced workshop step schema for tools and documents
+export const WorkshopStepSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  content: z.string(), // Markdown content
+  tools: z.array(z.object({
+    name: z.string(), // kubectl, helm, kustomize, etc.
+    version: z.string().optional(),
+    config: z.record(z.any()).optional(),
+  })).default([]),
+  documents: z.array(z.object({
+    id: z.number(),
+    fileName: z.string(),
+    description: z.string(),
+    type: z.enum(['pdf', 'md', 'txt']),
+  })).default([]),
+  validation: z.object({
+    commands: z.array(z.string()).optional(), // Commands to validate step completion
+    expectedOutput: z.string().optional(),
+  }).optional(),
+  estimatedDuration: z.number().optional(), // minutes
+});
+
+export type WorkshopStep = z.infer<typeof WorkshopStepSchema>;
+
+// Permissions schema for role-based access
+export const PermissionsSchema = z.object({
+  infrastructure: z.object({
+    view: z.boolean().default(false),
+    create: z.boolean().default(false),
+    update: z.boolean().default(false),
+    delete: z.boolean().default(false),
+  }).default({}),
+  workshops: z.object({
+    create: z.boolean().default(true),
+    publish: z.boolean().default(false),
+    moderate: z.boolean().default(false),
+  }).default({}),
+  users: z.object({
+    view: z.boolean().default(false),
+    manage: z.boolean().default(false),
+  }).default({}),
+  billing: z.object({
+    view: z.boolean().default(false),
+    manage: z.boolean().default(false),
+  }).default({}),
+});
+
+export type Permissions = z.infer<typeof PermissionsSchema>;

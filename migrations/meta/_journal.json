@@ -8,6 +8,13 @@
       "when": 1752760079669,
       "tag": "0000_empty_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752974822758,
+      "tag": "0001_glossy_wolf_cub",
+      "breakpoints": true
     }
   ]
 }

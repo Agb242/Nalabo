@@ -1,557 +1,302 @@
-import { spawn, ChildProcess } from 'child_process';
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
+import { z } from 'zod';
 
-export interface KubernetesConfig {
-  kubeconfig?: string;
-  namespace?: string;
-  context?: string;
-  apiServer?: string;
-  token?: string;
-}
+const execAsync = promisify(exec);
 
 export interface VClusterConfig {
   name: string;
   namespace: string;
-  values?: Record<string, any>;
-  chart?: string;
-  version?: string;
-  resources?: {
-    cpu: string;
-    memory: string;
-    storage: string;
-  };
-  networking?: {
-    ingress?: boolean;
-    loadBalancer?: boolean;
-    nodePort?: boolean;
-  };
-}
-
-export interface WorkshopEnvironment {
-  id: string;
-  vclusterName: string;
-  namespace: string;
-  status: 'creating' | 'ready' | 'error' | 'destroying';
-  kubeconfig: string;
-  endpoints: {
-    api: string;
-    ingress?: string;
-  };
   resources: {
     cpu: string;
     memory: string;
     storage: string;
   };
-  createdAt: Date;
-  expiresAt: Date;
+  tools: string[];
+  expiresIn?: number; // hours
 }
 
-export class KubernetesService extends EventEmitter {
-  private config: KubernetesConfig;
-  private environments: Map<string, WorkshopEnvironment> = new Map();
+export interface KubernetesCluster {
+  id: number;
+  name: string;
+  kubeconfig: string;
+  endpoint: string;
+  provider: string;
+  status: 'active' | 'inactive' | 'maintenance';
+}
 
-  constructor(config: KubernetesConfig) {
-    super();
-    this.config = config;
+export class KubernetesService {
+  private kubeconfigPath: string;
+
+  constructor(kubeconfigPath?: string) {
+    this.kubeconfigPath = kubeconfigPath || process.env.KUBECONFIG || path.join(process.cwd(), '.kube', 'config');
   }
 
   /**
-   * Crée un vCluster pour un atelier
+   * Test connection to Kubernetes cluster
    */
-  async createWorkshopEnvironment(
-    workshopId: string,
-    userId: string,
-    config: VClusterConfig
-  ): Promise<WorkshopEnvironment> {
-    const environmentId = `workshop-${workshopId}-${userId}-${uuidv4().slice(0, 8)}`;
-    const vclusterName = `vcluster-${environmentId}`;
-    const namespace = config.namespace || `nalabo-${environmentId}`;
-
-    const environment: WorkshopEnvironment = {
-      id: environmentId,
-      vclusterName,
-      namespace,
-      status: 'creating',
-      kubeconfig: '',
-      endpoints: {
-        api: '',
-      },
-      resources: config.resources || {
-        cpu: '1000m',
-        memory: '2Gi',
-        storage: '10Gi',
-      },
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 heures par défaut
-    };
-
-    this.environments.set(environmentId, environment);
-
+  async testConnection(kubeconfig?: string): Promise<boolean> {
     try {
-      // 1. Créer le namespace
+      const kubeconfigToUse = kubeconfig || this.kubeconfigPath;
+      await execAsync(`kubectl --kubeconfig=${kubeconfigToUse} version --client`, { timeout: 10000 });
+      return true;
+    } catch (error) {
+      console.error('Kubernetes connection test failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Create a new vCluster instance
+   */
+  async createVCluster(config: VClusterConfig): Promise<{ 
+    success: boolean; 
+    kubeconfig?: string; 
+    error?: string 
+  }> {
+    try {
+      const { name, namespace, resources, tools } = config;
+      
+      // Create namespace if it doesn't exist
       await this.createNamespace(namespace);
 
-      // 2. Installer le vCluster
-      await this.installVCluster(vclusterName, namespace, config);
-
-      // 3. Attendre que le vCluster soit prêt
-      await this.waitForVClusterReady(vclusterName, namespace);
-
-      // 4. Récupérer la kubeconfig du vCluster
-      const kubeconfig = await this.getVClusterKubeconfig(vclusterName, namespace);
-
-      // 5. Configurer les ressources par défaut dans le vCluster
-      await this.setupWorkshopResources(kubeconfig, config);
-
-      // Mettre à jour l'environnement
-      environment.status = 'ready';
-      environment.kubeconfig = kubeconfig;
-      environment.endpoints.api = await this.getVClusterApiEndpoint(vclusterName, namespace);
-
-      this.emit('environmentReady', environment);
-      return environment;
-
-    } catch (error) {
-      environment.status = 'error';
-      this.emit('environmentError', environment, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Détruit un environnement d'atelier
-   */
-  async destroyWorkshopEnvironment(environmentId: string): Promise<void> {
-    const environment = this.environments.get(environmentId);
-    if (!environment) {
-      throw new Error(`Environment ${environmentId} not found`);
-    }
-
-    environment.status = 'destroying';
-
-    try {
-      // Supprimer le vCluster
-      await this.uninstallVCluster(environment.vclusterName, environment.namespace);
-
-      // Supprimer le namespace
-      await this.deleteNamespace(environment.namespace);
-
-      this.environments.delete(environmentId);
-      this.emit('environmentDestroyed', environmentId);
-
-    } catch (error) {
-      this.emit('environmentError', environment, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Exécute une commande kubectl dans un environnement
-   */
-  async executeInEnvironment(
-    environmentId: string,
-    command: string[],
-    options?: { timeout?: number }
-  ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    const environment = this.environments.get(environmentId);
-    if (!environment || environment.status !== 'ready') {
-      throw new Error(`Environment ${environmentId} not ready`);
-    }
-
-    return this.executeKubectl(command, {
-      kubeconfig: environment.kubeconfig,
-      timeout: options?.timeout || 30000,
-    });
-  }
-
-  /**
-   * Obtient les logs d'un pod dans un environnement
-   */
-  async getEnvironmentLogs(
-    environmentId: string,
-    podName: string,
-    namespace: string = 'default',
-    options?: { follow?: boolean; tail?: number }
-  ): Promise<string | NodeJS.ReadableStream> {
-    const environment = this.environments.get(environmentId);
-    if (!environment || environment.status !== 'ready') {
-      throw new Error(`Environment ${environmentId} not ready`);
-    }
-
-    const args = ['logs', podName, '-n', namespace];
-    
-    if (options?.tail) {
-      args.push('--tail', options.tail.toString());
-    }
-
-    if (options?.follow) {
-      args.push('-f');
-      // Retourner un stream pour les logs en temps réel
-      return this.executeKubectlStream(args, {
-        kubeconfig: environment.kubeconfig,
-      });
-    }
-
-    const result = await this.executeKubectl(args, {
-      kubeconfig: environment.kubeconfig,
-    });
-
-    return result.stdout;
-  }
-
-  /**
-   * Applique des manifestes YAML dans un environnement
-   */
-  async applyManifests(
-    environmentId: string,
-    manifests: string
-  ): Promise<void> {
-    const environment = this.environments.get(environmentId);
-    if (!environment || environment.status !== 'ready') {
-      throw new Error(`Environment ${environmentId} not ready`);
-    }
-
-    // Écrire les manifestes dans un fichier temporaire
-    const tempFile = `/tmp/manifests-${environmentId}-${Date.now()}.yaml`;
-    const fs = await import('fs/promises');
-    await fs.writeFile(tempFile, manifests);
-
-    try {
-      await this.executeKubectl(['apply', '-f', tempFile], {
-        kubeconfig: environment.kubeconfig,
-      });
-    } finally {
-      // Nettoyer le fichier temporaire
-      await fs.unlink(tempFile).catch(() => {});
-    }
-  }
-
-  /**
-   * Obtient le statut des ressources dans un environnement
-   */
-  async getEnvironmentStatus(environmentId: string): Promise<any> {
-    const environment = this.environments.get(environmentId);
-    if (!environment) {
-      throw new Error(`Environment ${environmentId} not found`);
-    }
-
-    if (environment.status !== 'ready') {
-      return { status: environment.status };
-    }
-
-    try {
-      // Obtenir les pods
-      const podsResult = await this.executeKubectl(['get', 'pods', '-o', 'json'], {
-        kubeconfig: environment.kubeconfig,
-      });
-
-      // Obtenir les services
-      const servicesResult = await this.executeKubectl(['get', 'services', '-o', 'json'], {
-        kubeconfig: environment.kubeconfig,
-      });
-
-      return {
-        status: environment.status,
-        pods: JSON.parse(podsResult.stdout),
-        services: JSON.parse(servicesResult.stdout),
-        endpoints: environment.endpoints,
-        resources: environment.resources,
-        expiresAt: environment.expiresAt,
+      // Generate vCluster values
+      const vclusterValues = {
+        vcluster: {
+          image: 'rancher/k3s:v1.28.4-k3s1',
+          resources: {
+            limits: {
+              cpu: resources.cpu,
+              memory: resources.memory,
+            },
+            requests: {
+              cpu: Math.round(parseFloat(resources.cpu) * 0.1) + 'm',
+              memory: Math.round(parseFloat(resources.memory.replace('Gi', '')) * 0.1) + 'Gi',
+            }
+          }
+        },
+        storage: {
+          size: resources.storage,
+        },
+        init: {
+          manifests: this.generateToolManifests(tools),
+        }
       };
 
-    } catch (error) {
+      // Create vCluster
+      const valuesFile = `/tmp/vcluster-${name}-values.yaml`;
+      await fs.writeFile(valuesFile, yaml.dump(vclusterValues));
+
+      const createCommand = `vcluster create ${name} --namespace ${namespace} -f ${valuesFile}`;
+      await execAsync(createCommand, { timeout: 300000 }); // 5 minutes timeout
+
+      // Get kubeconfig for the vCluster
+      const kubeconfigCommand = `vcluster connect ${name} --namespace ${namespace} --print`;
+      const { stdout: kubeconfig } = await execAsync(kubeconfigCommand);
+
+      // Clean up temporary file
+      await fs.unlink(valuesFile);
+
       return {
-        status: 'error',
-        error: error.message,
+        success: true,
+        kubeconfig: kubeconfig.trim(),
+      };
+    } catch (error) {
+      console.error('Failed to create vCluster:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
 
-  // Méthodes privées
+  /**
+   * Delete a vCluster instance
+   */
+  async deleteVCluster(name: string, namespace: string): Promise<boolean> {
+    try {
+      const deleteCommand = `vcluster delete ${name} --namespace ${namespace}`;
+      await execAsync(deleteCommand, { timeout: 120000 }); // 2 minutes timeout
+      return true;
+    } catch (error) {
+      console.error('Failed to delete vCluster:', error);
+      return false;
+    }
+  }
 
+  /**
+   * List all vClusters in a namespace
+   */
+  async listVClusters(namespace?: string): Promise<Array<{
+    name: string;
+    namespace: string;
+    status: string;
+  }>> {
+    try {
+      const listCommand = namespace 
+        ? `vcluster list --namespace ${namespace} --output json`
+        : `vcluster list --output json`;
+      
+      const { stdout } = await execAsync(listCommand);
+      const result = JSON.parse(stdout);
+      
+      return result.vclusters || [];
+    } catch (error) {
+      console.error('Failed to list vClusters:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get vCluster status and resource usage
+   */
+  async getVClusterStatus(name: string, namespace: string): Promise<{
+    status: string;
+    resources?: {
+      cpu: string;
+      memory: string;
+      pods: number;
+    };
+  }> {
+    try {
+      // Get basic status
+      const statusCommand = `vcluster list --namespace ${namespace} --output json`;
+      const { stdout } = await execAsync(statusCommand);
+      const result = JSON.parse(stdout);
+      
+      const vcluster = result.vclusters?.find((vc: any) => vc.name === name);
+      if (!vcluster) {
+        return { status: 'not_found' };
+      }
+
+      // Get resource usage
+      const resourceCommand = `kubectl top pods -n ${namespace} -l app=vcluster,release=${name} --no-headers`;
+      try {
+        const { stdout: resourceOutput } = await execAsync(resourceCommand);
+        const lines = resourceOutput.trim().split('\n');
+        let totalCpu = 0;
+        let totalMemory = 0;
+        
+        lines.forEach(line => {
+          const parts = line.split(/\s+/);
+          if (parts.length >= 3) {
+            totalCpu += parseInt(parts[1].replace('m', '')) || 0;
+            totalMemory += parseInt(parts[2].replace('Mi', '')) || 0;
+          }
+        });
+
+        return {
+          status: vcluster.status,
+          resources: {
+            cpu: `${totalCpu}m`,
+            memory: `${totalMemory}Mi`,
+            pods: lines.length,
+          }
+        };
+      } catch (resourceError) {
+        return { status: vcluster.status };
+      }
+    } catch (error) {
+      console.error('Failed to get vCluster status:', error);
+      return { status: 'error' };
+    }
+  }
+
+  /**
+   * Create namespace if it doesn't exist
+   */
   private async createNamespace(namespace: string): Promise<void> {
     try {
-      await this.executeKubectl(['create', 'namespace', namespace]);
+      await execAsync(`kubectl get namespace ${namespace}`);
     } catch (error) {
-      // Ignorer si le namespace existe déjà
-      if (!error.message.includes('already exists')) {
-        throw error;
-      }
+      // Namespace doesn't exist, create it
+      await execAsync(`kubectl create namespace ${namespace}`);
     }
   }
 
-  private async deleteNamespace(namespace: string): Promise<void> {
-    await this.executeKubectl(['delete', 'namespace', namespace, '--ignore-not-found=true']);
-  }
+  /**
+   * Generate Kubernetes manifests for required tools
+   */
+  private generateToolManifests(tools: string[]): string {
+    const manifests: string[] = [];
 
-  private async installVCluster(
-    name: string,
-    namespace: string,
-    config: VClusterConfig
-  ): Promise<void> {
-    const args = [
-      'create', name,
-      '--namespace', namespace,
-    ];
-
-    // Ajouter les valeurs personnalisées
-    if (config.values) {
-      const valuesFile = `/tmp/values-${name}.yaml`;
-      const fs = await import('fs/promises');
-      const yaml = await import('yaml');
-      
-      await fs.writeFile(valuesFile, yaml.stringify(config.values));
-      args.push('--values', valuesFile);
-    }
-
-    // Ajouter les ressources
-    if (config.resources) {
-      args.push('--set', `resources.requests.cpu=${config.resources.cpu}`);
-      args.push('--set', `resources.requests.memory=${config.resources.memory}`);
-      args.push('--set', `resources.limits.cpu=${config.resources.cpu}`);
-      args.push('--set', `resources.limits.memory=${config.resources.memory}`);
-    }
-
-    await this.executeVCluster(args);
-  }
-
-  private async uninstallVCluster(name: string, namespace: string): Promise<void> {
-    await this.executeVCluster(['delete', name, '--namespace', namespace]);
-  }
-
-  private async waitForVClusterReady(name: string, namespace: string): Promise<void> {
-    const maxAttempts = 60; // 5 minutes
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      try {
-        const result = await this.executeKubectl([
-          'get', 'pod',
-          '-l', `app=vcluster,release=${name}`,
-          '-n', namespace,
-          '-o', 'jsonpath={.items[0].status.phase}'
-        ]);
-
-        if (result.stdout.trim() === 'Running') {
-          // Attendre encore un peu pour que l'API soit prête
-          await new Promise(resolve => setTimeout(resolve, 10000));
-          return;
-        }
-      } catch (error) {
-        // Continuer à attendre
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      attempts++;
-    }
-
-    throw new Error(`vCluster ${name} did not become ready within timeout`);
-  }
-
-  private async getVClusterKubeconfig(name: string, namespace: string): Promise<string> {
-    const result = await this.executeVCluster([
-      'connect', name,
-      '--namespace', namespace,
-      '--print-kubeconfig'
-    ]);
-
-    return result.stdout;
-  }
-
-  private async getVClusterApiEndpoint(name: string, namespace: string): Promise<string> {
-    const result = await this.executeKubectl([
-      'get', 'service',
-      `${name}`,
-      '-n', namespace,
-      '-o', 'jsonpath={.spec.clusterIP}'
-    ]);
-
-    return `https://${result.stdout.trim()}:443`;
-  }
-
-  private async setupWorkshopResources(kubeconfig: string, config: VClusterConfig): Promise<void> {
-    // Créer les namespaces par défaut
-    const defaultNamespaces = ['default', 'kube-system', 'workshop'];
-    
-    for (const ns of defaultNamespaces) {
-      try {
-        await this.executeKubectl(['create', 'namespace', ns], { kubeconfig });
-      } catch (error) {
-        // Ignorer si existe déjà
-      }
-    }
-
-    // Appliquer des RBAC par défaut pour l'atelier
-    const rbacManifest = `
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+    if (tools.includes('helm')) {
+      manifests.push(`
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: workshop-user
-rules:
-- apiGroups: [""]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["apps"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["extensions"]
-  resources: ["*"]
-  verbs: ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+  name: helm-installer
+  namespace: kube-system
+data:
+  install.sh: |
+    #!/bin/bash
+    curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+`);
+    }
+
+    if (tools.includes('kustomize')) {
+      manifests.push(`
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: workshop-user-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: workshop-user
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: default
-`;
+  name: kustomize-installer
+  namespace: kube-system
+data:
+  install.sh: |
+    #!/bin/bash
+    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+`);
+    }
 
-    const tempFile = `/tmp/rbac-${Date.now()}.yaml`;
-    const fs = await import('fs/promises');
-    await fs.writeFile(tempFile, rbacManifest);
+    return manifests.join('\n---\n');
+  }
 
+  /**
+   * Validate kubeconfig format
+   */
+  static validateKubeconfig(kubeconfig: string): boolean {
     try {
-      await this.executeKubectl(['apply', '-f', tempFile], { kubeconfig });
-    } finally {
-      await fs.unlink(tempFile).catch(() => {});
-    }
-  }
-
-  private async executeKubectl(
-    args: string[],
-    options?: { kubeconfig?: string; timeout?: number }
-  ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    return new Promise((resolve, reject) => {
-      const env = { ...process.env };
-      
-      if (options?.kubeconfig) {
-        env.KUBECONFIG = options.kubeconfig;
-      } else if (this.config.kubeconfig) {
-        env.KUBECONFIG = this.config.kubeconfig;
-      }
-
-      const kubectl = spawn('kubectl', args, { env });
-      
-      let stdout = '';
-      let stderr = '';
-
-      kubectl.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      kubectl.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      const timeout = options?.timeout || 30000;
-      const timer = setTimeout(() => {
-        kubectl.kill();
-        reject(new Error(`kubectl command timed out after ${timeout}ms`));
-      }, timeout);
-
-      kubectl.on('close', (code) => {
-        clearTimeout(timer);
-        
-        if (code === 0) {
-          resolve({ stdout, stderr, exitCode: code });
-        } else {
-          reject(new Error(`kubectl command failed with code ${code}: ${stderr}`));
-        }
-      });
-
-      kubectl.on('error', (error) => {
-        clearTimeout(timer);
-        reject(error);
-      });
-    });
-  }
-
-  private executeKubectlStream(
-    args: string[],
-    options?: { kubeconfig?: string }
-  ): NodeJS.ReadableStream {
-    const env = { ...process.env };
-    
-    if (options?.kubeconfig) {
-      env.KUBECONFIG = options.kubeconfig;
-    } else if (this.config.kubeconfig) {
-      env.KUBECONFIG = this.config.kubeconfig;
-    }
-
-    const kubectl = spawn('kubectl', args, { env });
-    return kubectl.stdout;
-  }
-
-  private async executeVCluster(args: string[]): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    return new Promise((resolve, reject) => {
-      const env = { ...process.env };
-      
-      if (this.config.kubeconfig) {
-        env.KUBECONFIG = this.config.kubeconfig;
-      }
-
-      const vcluster = spawn('vcluster', args, { env });
-      
-      let stdout = '';
-      let stderr = '';
-
-      vcluster.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      vcluster.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      vcluster.on('close', (code) => {
-        if (code === 0) {
-          resolve({ stdout, stderr, exitCode: code });
-        } else {
-          reject(new Error(`vcluster command failed with code ${code}: ${stderr}`));
-        }
-      });
-
-      vcluster.on('error', (error) => {
-        reject(error);
-      });
-    });
-  }
-
-  /**
-   * Nettoie les environnements expirés
-   */
-  async cleanupExpiredEnvironments(): Promise<void> {
-    const now = new Date();
-    
-    for (const [id, environment] of this.environments.entries()) {
-      if (environment.expiresAt < now) {
-        try {
-          await this.destroyWorkshopEnvironment(id);
-        } catch (error) {
-          console.error(`Failed to cleanup environment ${id}:`, error);
-        }
-      }
+      const config = yaml.load(kubeconfig) as any;
+      return (
+        config &&
+        config.apiVersion &&
+        config.kind === 'Config' &&
+        config.clusters &&
+        Array.isArray(config.clusters) &&
+        config.users &&
+        Array.isArray(config.users) &&
+        config.contexts &&
+        Array.isArray(config.contexts)
+      );
+    } catch (error) {
+      return false;
     }
   }
 
   /**
-   * Obtient tous les environnements actifs
+   * Extract cluster information from kubeconfig
    */
-  getActiveEnvironments(): WorkshopEnvironment[] {
-    return Array.from(this.environments.values());
-  }
-
-  /**
-   * Obtient un environnement spécifique
-   */
-  getEnvironment(environmentId: string): WorkshopEnvironment | undefined {
-    return this.environments.get(environmentId);
+  static extractClusterInfo(kubeconfig: string): {
+    endpoint?: string;
+    name?: string;
+    certificate?: string;
+  } {
+    try {
+      const config = yaml.load(kubeconfig) as any;
+      const cluster = config.clusters?.[0]?.cluster;
+      
+      return {
+        endpoint: cluster?.server,
+        name: config.clusters?.[0]?.name,
+        certificate: cluster?.['certificate-authority-data'],
+      };
+    } catch (error) {
+      return {};
+    }
   }
 }
+
+export default KubernetesService;
