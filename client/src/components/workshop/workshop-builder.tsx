@@ -132,17 +132,39 @@ export function WorkshopBuilder({ onSave, onPreview, initialWorkshop }: Workshop
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!workshop.title.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Le titre de l'atelier est requis",
-        variant: "destructive",
-      });
+      alert('Le titre de l\'atelier est requis');
       return;
     }
 
-    saveWorkshopMutation.mutate(workshop);
+    try {
+      const response = await fetch('/api/workshops', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workshop),
+      });
+
+      if (response.ok) {
+        const savedWorkshop = await response.json();
+        alert('Atelier sauvegardé avec succès !');
+
+        // Nettoyer le localStorage après sauvegarde réussie
+        localStorage.removeItem('workshop-draft');
+
+        // Optionnel : rediriger vers la liste des ateliers
+        // navigate('/workshops');
+      } else {
+        const error = await response.json();
+        alert('Erreur lors de la sauvegarde : ' + error.message);
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde atelier:', error);
+      alert('Erreur de connexion. Atelier sauvegardé localement.');
+      localStorage.setItem('workshop-draft', JSON.stringify(workshop));
+    }
   };
 
   const handlePreview = () => {

@@ -167,7 +167,7 @@ router.get('/sessions/:sessionId/logs', requireAuth, async (req, res) => {
       // Stream les logs en temps réel
       res.setHeader('Content-Type', 'text/plain');
       res.setHeader('Transfer-Encoding', 'chunked');
-      
+
       logs.on('data', (chunk) => {
         res.write(chunk);
       });
@@ -245,7 +245,7 @@ router.delete('/sessions/:sessionId', requireAuth, async (req, res) => {
 router.get('/sessions', requireAuth, async (req, res) => {
   try {
     const sessions = workshopOrchestrator.getActiveSessions();
-    
+
     // Filtrer par utilisateur si pas admin
     const filteredSessions = req.session.userRole === 'admin' 
       ? sessions 

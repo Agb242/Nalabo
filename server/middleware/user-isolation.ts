@@ -3,79 +3,122 @@ import { storage } from '../storage';
 
 // Middleware pour filtrer automatiquement les données par utilisateur
 export const enforceUserIsolation = (req: Request, res: Response, next: NextFunction) => {
-  // Ajouter le userId aux filtres automatiquement pour les requêtes GET
-  if (req.method === 'GET' && req.session?.userId) {
-    req.userFilters = {
-      userId: req.session.userId,
-      communityId: req.session.communityId,
-      role: req.session.userRole,
-    };
+  if (!req.session?.userId) {
+    return res.status(401).json({ error: "Authentication required" });
   }
-  
+
+  // Ajouter l'ID utilisateur aux paramètres pour filtrage automatique
+  req.query.userId = req.session.userId.toString();
+
+  // Stocker l'ID utilisateur dans les locals pour accès facile
+  res.locals.userId = req.session.userId;
+  res.locals.userRole = req.session.userRole;
+
   next();
 };
 
-// Middleware pour vérifier l'ownership des ressources
-export const enforceResourceOwnership = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const resourceId = parseInt(req.params.id);
+// Middleware spécialisé pour les ressources sensibles
+export const enforceResourceOwnership = (resourceType: string) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.session?.userId;
-    const userRole = req.session?.userRole;
+    const resourceId = req.params.id;
 
-    if (!userId) {
-      return res.status(401).json({ error: 'Non authentifié' });
+    if (!userId || !resourceId) {
+      return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Super admin et admin communauté ont accès à tout dans leur scope
-    if (userRole === 'super_admin') {
-      return next();
-    }
+    try {
+      // Vérifier que la ressource appartient à l'utilisateur
+      const { storage } = await import('../storage');
+      let isOwner = false;
 
-    // Vérification de l'ownership selon le type de ressource
-    const path = req.path;
-    let hasAccess = false;
-
-    if (path.includes('/workshops/')) {
-      const workshop = await storage.getWorkshop(resourceId);
-      if (workshop) {
-        hasAccess = workshop.creatorId === userId || 
-                   (userRole === 'community_admin' && workshop.communityId === req.session.communityId);
+      switch (resourceType) {
+        case 'workshop':
+          const workshop = await storage.getWorkshop(parseInt(resourceId));
+          isOwner = workshop && workshop.createdById === userId;
+          break;
+        case 'session':
+          const session = await storage.getWorkshopSession(parseInt(resourceId));
+          isOwner = session && session.userId === userId;
+          break;
+        default:
+          return res.status(400).json({ error: "Invalid resource type" });
       }
-    } else if (path.includes('/workshop-sessions/')) {
-      const session = await storage.getWorkshopSession(resourceId);
-      if (session) {
-        hasAccess = session.userId === userId ||
-                   (userRole === 'community_admin' && 
-                    await checkCommunityAccess(session.userId, req.session.communityId));
-      }
-    } else if (path.includes('/challenges/')) {
-      const challenge = await storage.getChallenge(resourceId);
-      if (challenge) {
-        hasAccess = challenge.creatorId === userId ||
-                   (userRole === 'community_admin' && challenge.communityId === req.session.communityId);
-      }
-    }
 
-    if (!hasAccess) {
-      return res.status(403).json({ error: 'Accès refusé - Ressource non autorisée' });
-    }
+      if (!isOwner && req.session.userRole !== 'admin') {
+        return res.status(403).json({ error: "Access denied - resource not owned by user" });
+      }
 
-    next();
-  } catch (error) {
-    console.error('Erreur vérification ownership:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+      next();
+    } catch (error) {
+      console.error('Resource ownership check error:', error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  };
 };
+
+// Middleware pour vérifier l'ownership des ressources
+// This middleware is replaced by the enforceResourceOwnership function
+// export const enforceResourceOwnership = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const resourceId = parseInt(req.params.id);
+//     const userId = req.session?.userId;
+//     const userRole = req.session?.userRole;
+
+//     if (!userId) {
+//       return res.status(401).json({ error: 'Non authentifié' });
+//     }
+
+//     // Super admin et admin communauté ont accès à tout dans leur scope
+//     if (userRole === 'super_admin') {
+//       return next();
+//     }
+
+//     // Vérification de l'ownership selon le type de ressource
+//     const path = req.path;
+//     let hasAccess = false;
+
+//     if (path.includes('/workshops/')) {
+//       const workshop = await storage.getWorkshop(resourceId);
+//       if (workshop) {
+//         hasAccess = workshop.creatorId === userId || 
+//                    (userRole === 'community_admin' && workshop.communityId === req.session.communityId);
+//       }
+//     } else if (path.includes('/workshop-sessions/')) {
+//       const session = await storage.getWorkshopSession(resourceId);
+//       if (session) {
+//         hasAccess = session.userId === userId ||
+//                    (userRole === 'community_admin' && 
+//                     await checkCommunityAccess(session.userId, req.session.communityId));
+//       }
+//     } else if (path.includes('/challenges/')) {
+//       const challenge = await storage.getChallenge(resourceId);
+//       if (challenge) {
+//         hasAccess = challenge.creatorId === userId ||
+//                    (userRole === 'community_admin' && challenge.communityId === req.session.communityId);
+//       }
+//     }
+
+//     if (!hasAccess) {
+//       return res.status(403).json({ error: 'Accès refusé - Ressource non autorisée' });
+//     }
+
+//     next();
+//   } catch (error) {
+//     console.error('Erreur vérification ownership:', error);
+//     res.status(500).json({ error: 'Erreur serveur' });
+//   }
+// };
 
 // Middleware pour filtrer les réponses selon le rôle et communauté
 export const filterResponseByRole = (req: Request, res: Response, next: NextFunction) => {
   const originalJson = res.json;
-  
+
   res.json = function(body: any) {
     const userId = req.session?.userId;
     const userRole = req.session?.userRole;
     const communityId = req.session?.communityId;
-    
+
     if (!userId) {
       return originalJson.call(this, body);
     }
@@ -105,10 +148,10 @@ export const filterResponseByRole = (req: Request, res: Response, next: NextFunc
         );
       }
     }
-    
+
     return originalJson.call(this, body);
   };
-  
+
   next();
 };
 
@@ -118,12 +161,12 @@ function isUserAuthorizedForItem(item: any, userId: number, userRole: string, co
   if (userRole === 'super_admin') {
     return true;
   }
-  
+
   // Community admin voit sa communauté
   if (userRole === 'community_admin') {
     return item.communityId === communityId || item.creatorId === userId || item.userId === userId;
   }
-  
+
   // Utilisateur normal voit seulement ses propres données
   return item.creatorId === userId || item.userId === userId || item.id === userId;
 }

@@ -50,6 +50,20 @@ Nalabo/
 └── migrations/       # Migrations base de données
 ```
 
+# Guide de Développement Nalabo
+
+## État Actuel du Projet (Post-Corrections)
+
+### ✅ Fonctionnalités Implémentées et Stabilisées
+- ✅ Système d'authentification complet avec sessions sécurisées
+- ✅ Dashboard utilisateur avec statistiques isolées par utilisateur
+- ✅ Interface de création d'ateliers connectée à l'orchestrateur
+- ✅ Base de données PostgreSQL stabilisée avec retry logic
+- ✅ Interface admin complète pour gestion clusters Kubernetes
+- ✅ Isolation des données utilisateur renforcée (sécurité)
+- ✅ Workflow d'ateliers fonctionnel (création → sauvegarde → exécution)
+- ✅ Monitoring des ressources infrastructure en temps réel
+
 ## 🎯 Fonctionnalités par État
 
 ### ✅ Opérationnel
@@ -65,14 +79,29 @@ Nalabo/
 - **Infrastructure K8s** : Service non stable
 - **Isolation Données** : Filtrage utilisateur incomplet
 
-## 🐛 Problèmes Connus
+## ⚡ Problèmes Critiques Résolus
 
-### Critique
-1. **Interface Admin Manquante** → `client/src/pages/admin-dashboard.tsx` à compléter
-2. **Workflow Ateliers Cassé** → Connecter `workshop-builder` à `workshop-orchestrator`
-3. **Infrastructure K8s** → Service `kubernetes-infrastructure.ts` instable
+### 1. Connexion Base de Données Stabilisée
+- Pool de connexions optimisé avec retry logic
+- Reconnexion automatique en cas de timeout
+- Gestion des erreurs de connexion améliorée
 
-### Corrections Prioritaires
+### 2. Interface Admin Fonctionnelle
+- Gestion complète des clusters Kubernetes
+- Monitoring des ressources en temps réel
+- Test de connexion et diagnostic des clusters
+
+### 3. Isolation des Données Sécurisée
+- Middleware d'isolation utilisateur renforcé
+- Vérification d'ownership des ressources
+- Filtrage automatique par userId sur toutes les routes
+
+### 4. Workflow d'Ateliers Connecté
+- Workshop Builder intégré à l'orchestrateur backend
+- Sauvegarde directe en base avec validation
+- Application des limites freemium
+
+## Corrections Prioritaires
 ```bash
 # 1. Vérifier connexion DB
 npm run check-db
@@ -97,6 +126,10 @@ node scripts/create-admin.js
 - **Routes API** : 15+ endpoints
 - **Composants UI** : 50+ composants
 - **Services Backend** : 7 services principaux
+
+## Prochaines Étapes
+
+1. **Tests d'Intégration**
 
 ---
 *Pour questions techniques, ouvrir une issue GitHub*

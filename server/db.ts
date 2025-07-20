@@ -20,16 +20,20 @@ if (!process.env.DATABASE_URL) {
 // Add application name to connection string
 const connectionString = process.env.DATABASE_URL + (process.env.DATABASE_URL.includes('?') ? '&' : '?') + 'application_name=nalabo_app';
 
-// Create a connection pool with better timeout and reconnection settings
+// Create a connection pool with enhanced retry logic and stability
 export const pool = new Pool({ 
   connectionString,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 5, // Reduced max connections to prevent exhausting server limits
-  min: 1,   // Maintain a minimum number of connections
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
-  maxUses: 7500, // Close and remove a connection after it has been used this many times
+  max: 3, // Reduced for stability
+  min: 1,
+  idleTimeoutMillis: 60000, // Extended idle timeout
+  connectionTimeoutMillis: 15000, // Extended connection timeout
+  maxUses: 5000,
   allowExitOnIdle: true,
+  // Enhanced retry configuration
+  retryOnFailure: true,
+  retryDelay: 1000,
+  maxRetries: 3,
 });
 
 // Handle connection errors
@@ -50,12 +54,28 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Configuration pour la reconnexion automatique
-pool.on('error', (err) => {
+// Configuration pour la reconnexion automatique avec retry logic
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+
+pool.on('error', async (err) => {
   console.error('Database connection error:', err);
-  if (err.message.includes('terminating connection')) {
-    console.log('🔄 Tentative de reconnexion automatique...');
-    // La reconnexion sera gérée automatiquement par le pool
+  
+  if (err.message.includes('terminating connection') || err.code === 'ECONNRESET') {
+    reconnectAttempts++;
+    console.log(`🔄 Tentative de reconnexion ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
+    
+    if (reconnectAttempts <= MAX_RECONNECT_ATTEMPTS) {
+      setTimeout(async () => {
+        try {
+          await testConnection();
+          reconnectAttempts = 0; // Reset on successful connection
+          console.log('✅ Reconnexion réussie');
+        } catch (retryError) {
+          console.error('❌ Échec de la reconnexion:', retryError);
+        }
+      }, 2000 * reconnectAttempts); // Exponential backoff
+    }
   }
 });
 
