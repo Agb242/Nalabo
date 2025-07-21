@@ -24,13 +24,13 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* Nalabo custom colors */
-  --nalabo-orange: hsl(20, 100%, 60%);
-  --nalabo-blue: hsl(221, 83%, 53%);
-  --nalabo-emerald: hsl(142, 76%, 36%);
-  --nalabo-slate: hsl(215, 28%, 17%);
-  --nalabo-light: hsl(210, 40%, 98%);
-  --nalabo-dark: hsl(222, 84%, 5%);
+  /* Nalabo custom colors - tons plus doux */
+  --nalabo-orange: hsl(25, 70%, 55%);
+  --nalabo-blue: hsl(215, 70%, 50%);
+  --nalabo-emerald: hsl(145, 60%, 45%);
+  --nalabo-slate: hsl(215, 25%, 25%);
+  --nalabo-light: hsl(210, 30%, 96%);
+  --nalabo-dark: hsl(222, 60%, 8%);
 }
 
 .dark {

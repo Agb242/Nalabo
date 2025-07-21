@@ -44,20 +44,17 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/">
-              <div className="flex items-center gap-3 group cursor-pointer">
-                <div className="w-10 h-10 bg-gradient-to-br from-nalabo-orange to-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 animate-logo-float">
+              <div className="flex items-center gap-3 cursor-pointer">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-nalabo-orange to-nalabo-blue bg-clip-text text-transparent">
+                <span className="text-2xl font-semibold text-gray-800">
                   Nalabo
-                </span>
-                <span className="hidden sm:inline text-xs bg-gradient-to-r from-blue-600 to-red-600 text-white px-2 py-1 rounded-full font-semibold">
-                  🇫🇷 FR
                 </span>
               </div>
             </Link>
@@ -66,9 +63,8 @@ export function Header() {
             <nav className="hidden lg:flex items-center gap-8">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <span className="text-gray-700 hover:text-nalabo-orange font-medium transition-colors duration-200 cursor-pointer relative group">
+                  <span className="text-gray-600 hover:text-blue-600 font-medium transition-colors cursor-pointer">
                     {item.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-nalabo-orange group-hover:w-full transition-all duration-300"></span>
                   </span>
                 </Link>
               ))}
@@ -81,7 +77,7 @@ export function Header() {
               {user ? (
                 <div className="flex items-center gap-3">
                   <Link href="/dashboard">
-                    <Button variant="ghost" className="text-nalabo-blue hover:text-nalabo-orange">
+                    <Button variant="ghost" className="text-gray-600 hover:text-blue-600">
                       {t('nav.dashboard')}
                     </Button>
                   </Link>
@@ -89,10 +85,10 @@ export function Header() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-nalabo-orange to-orange-500 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                           <User className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-sm font-medium">{user.firstName}</span>
+                        <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
@@ -140,13 +136,13 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     onClick={() => openAuthModal('login')}
-                    className="text-nalabo-blue hover:text-nalabo-orange font-medium"
+                    className="text-gray-600 hover:text-blue-600 font-medium"
                   >
                     {t('auth.login')}
                   </Button>
                   <Button 
                     onClick={() => openAuthModal('register')}
-                    className="bg-gradient-to-r from-nalabo-orange to-orange-500 hover:from-orange-500 hover:to-nalabo-orange text-white px-6 py-2 rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
                   >
                     {t('auth.register')}
                   </Button>
@@ -170,12 +166,12 @@ export function Header() {
 
           {/* Mobile Navigation */}
           {isMenuOpen && (
-            <div className="lg:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md">
+            <div className="lg:hidden border-t border-gray-200 bg-white">
               <div className="py-4 space-y-2">
                 {navigation.map((item) => (
                   <Link key={item.name} href={item.href}>
                     <div 
-                      className="block px-4 py-3 text-gray-700 hover:text-nalabo-orange hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                      className="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg cursor-pointer"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.name}
@@ -187,7 +183,7 @@ export function Header() {
                   <div className="border-t border-gray-200 pt-4 mt-4">
                     <Link href="/dashboard">
                       <div 
-                        className="block px-4 py-3 text-gray-700 hover:text-nalabo-orange hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                        className="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg cursor-pointer"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {t('nav.dashboard')}
@@ -195,7 +191,7 @@ export function Header() {
                     </Link>
                     <Link href="/profile">
                       <div 
-                        className="block px-4 py-3 text-gray-700 hover:text-nalabo-orange hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                        className="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg cursor-pointer"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {t('auth.profile')}
@@ -228,7 +224,7 @@ export function Header() {
                         openAuthModal('register');
                         setIsMenuOpen(false);
                       }}
-                      className="w-full bg-gradient-to-r from-nalabo-orange to-orange-500 hover:from-orange-500 hover:to-nalabo-orange text-white mx-4 rounded-lg"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white mx-4 rounded-lg"
                     >
                       {t('auth.register')}
                     </Button>

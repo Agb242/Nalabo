@@ -27,8 +27,6 @@ import {
   Layers,
   Phone,
   Mail,
-  FolderOpen,
-  Settings,
   Terminal,
   FileText,
   Package
