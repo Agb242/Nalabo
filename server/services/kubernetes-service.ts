@@ -346,6 +346,22 @@ data:
       return false;
     }
   }
+
+  /**
+   * 
+   */
+  
+// Heartbeat pour maintenir la connexion
+  private startHeartbeat() {
+    // Désactivé temporairement car kubectl n'est pas disponible dans l'environnement
+    // this.heartbeatInterval = setInterval(async () => {
+    //   try {
+    //     await this.executeKubectl(['version', '--client']);
+    //   } catch (error) {
+    //     console.error('Kubernetes heartbeat failed:', error);
+    //   }
+    // }, 30000); // Toutes les 30 secondes
+  }
 }
 
 export default KubernetesService;

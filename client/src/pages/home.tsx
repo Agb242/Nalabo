@@ -29,7 +29,9 @@ import {
   Mail,
   Terminal,
   FileText,
-  Package
+  Package,
+  FolderOpen,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-context';
 import { useLanguage } from '@/contexts/language-context';
@@ -155,6 +157,7 @@ const pricingPlans = [
       'Multi-cloud integrations',
       'SSO & advanced security',
       'Dedicated support',
+      'Custom support',
       'Custom branding',
       'Analytics dashboard'
     ],

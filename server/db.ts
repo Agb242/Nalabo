@@ -24,16 +24,16 @@ const connectionString = process.env.DATABASE_URL + (process.env.DATABASE_URL.in
 export const pool = new Pool({ 
   connectionString,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 3, // Reduced for stability
-  min: 1,
-  idleTimeoutMillis: 60000, // Extended idle timeout
-  connectionTimeoutMillis: 15000, // Extended connection timeout
-  maxUses: 5000,
+  max: 2, // Further reduced for stability
+  min: 0, // Allow pool to scale down completely
+  idleTimeoutMillis: 30000, // Shorter idle timeout to prevent admin disconnects
+  connectionTimeoutMillis: 10000, // Reduced connection timeout
+  maxUses: 1000, // Lower max uses per connection
   allowExitOnIdle: true,
   // Enhanced retry configuration
   retryOnFailure: true,
-  retryDelay: 1000,
-  maxRetries: 3,
+  retryDelay: 2000,
+  maxRetries: 5,
 });
 
 // Handle connection errors
